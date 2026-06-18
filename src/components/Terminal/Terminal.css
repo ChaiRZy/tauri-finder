@@ -1,0 +1,136 @@
+.terminal-wrapper {
+  flex-direction: column;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.terminal-drag-handle {
+  height: 4px;
+  cursor: row-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.terminal-drag-handle:hover .terminal-drag-bar,
+.terminal-drag-handle:active .terminal-drag-bar {
+  background: #4A90D9;
+}
+
+.terminal-drag-bar {
+  width: 48px;
+  height: 2px;
+  border-radius: 1px;
+  background: #555;
+  transition: background 0.15s;
+}
+
+.terminal-panel {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid #333;
+  background: #1e1e1e;
+  min-height: 0;
+}
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  background: #2d2d2d;
+  border-bottom: 1px solid #3c3c3c;
+  flex-shrink: 0;
+}
+
+.terminal-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+  flex: 1;
+}
+
+.terminal-tab {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #888;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  user-select: none;
+  min-width: 0;
+}
+
+.terminal-tab:hover {
+  color: #ccc;
+  background: #363636;
+}
+
+.terminal-tab.active {
+  color: #fff;
+  border-bottom-color: #4A90D9;
+  background: #1e1e1e;
+}
+
+.terminal-tab-icon {
+  font-size: 10px;
+  font-weight: 700;
+  opacity: 0.7;
+}
+
+.terminal-tab-name {
+  font-size: 12px;
+}
+
+.terminal-tab-close {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 10px;
+  padding: 0 2px;
+  line-height: 1;
+  margin-left: 2px;
+}
+
+.terminal-tab-close:hover {
+  color: #ff6b6b;
+}
+
+.terminal-tab-add {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px 10px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.terminal-tab-add:hover {
+  color: #fff;
+}
+
+.terminal-xterm {
+  flex: 1;
+  min-height: 0;
+  padding: 2px 0;
+  position: relative;
+}
+
+.terminal-xterm-instance {
+  position: absolute;
+  inset: 0;
+  padding: 0 4px;
+}
+
+.terminal-xterm-instance .xterm {
+  height: 100%;
+}

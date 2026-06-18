@@ -1,0 +1,29 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "opener:default",
+    "shell:default",
+    "shell:allow-execute",
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        { "name": "cmd", "cmd": "cmd", "args": true },
+        { "name": "powershell", "cmd": "powershell", "args": true },
+        { "name": "bash", "cmd": "C:\\Program Files\\Git\\bin\\bash.exe", "args": true }
+      ]
+    },
+    {
+      "identifier": "shell:allow-spawn",
+      "allow": [
+        { "name": "cmd", "cmd": "cmd", "args": true },
+        { "name": "powershell", "cmd": "powershell", "args": true },
+        { "name": "bash", "cmd": "C:\\Program Files\\Git\\bin\\bash.exe", "args": true }
+      ]
+    },
+    "shell:allow-stdin-write"
+  ]
+}

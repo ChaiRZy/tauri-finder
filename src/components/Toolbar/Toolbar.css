@@ -1,0 +1,160 @@
+.toolbar {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-bottom: 1px solid #e5e5e5;
+  background: #f0f0f2;
+  min-height: 36px;
+  gap: 4px;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+/* Window controls (macOS-style) */
+.window-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px;
+}
+
+.win-btn {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.win-close {
+  background: #ff5f57;
+  border: 1px solid #e2463f;
+}
+
+.win-minimize {
+  background: #febc2e;
+  border: 1px solid #dda524;
+}
+
+.win-maximize {
+  background: #28c840;
+  border: 1px solid #19a82f;
+}
+
+.win-btn:hover {
+  filter: brightness(0.85);
+}
+
+/* Breadcrumbs in toolbar */
+.toolbar-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+}
+
+.tb-breadcrumb {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.tb-breadcrumb-sep {
+  margin: 0 3px;
+  color: #999;
+  font-size: 14px;
+}
+
+.tb-breadcrumb-link {
+  font-size: 12px;
+  color: #555;
+  cursor: default;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.tb-breadcrumb-link:hover {
+  background: #e0e0e2;
+  color: #333;
+}
+
+.tb-breadcrumb-link.active {
+  color: #1d1d1f;
+  font-weight: 500;
+}
+
+/* Existing toolbar styles */
+.toolbar-label {
+  font-size: 11px;
+  color: #86868b;
+  margin-right: 2px;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 6px;
+  border: none;
+  background: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #555;
+  font-size: 12px;
+}
+
+.toolbar-btn:hover {
+  background: #e0e0e2;
+}
+
+.toolbar-btn.active {
+  background: #d0d0d4;
+  color: #1d1d1f;
+}
+
+.toolbar-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 18px;
+  background: #d4d4d8;
+  margin: 0 3px;
+}
+
+.toolbar-select {
+  border: 1px solid #d4d4d8;
+  border-radius: 4px;
+  background: #fff;
+  padding: 2px 6px;
+  font-size: 11px;
+  color: #333;
+  cursor: pointer;
+  outline: none;
+}
+
+.toolbar-select:focus {
+  border-color: #4A90D9;
+}
+
+.sort-order-indicator {
+  font-size: 10px;
+}

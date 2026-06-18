@@ -1,0 +1,262 @@
+/* File list table layout */
+.file-list-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.file-list-table {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.file-list-header {
+  display: flex;
+  align-items: center;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #86868b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #e5e5e5;
+  background: #fafafa;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.file-row {
+  display: flex;
+  align-items: center;
+  padding: 5px 12px;
+  cursor: default;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.05s;
+}
+
+.file-row:hover {
+  background: #f0f0f2;
+}
+
+.file-row.selected {
+  background: #d4e4f7;
+}
+
+.file-row.drag-over {
+  background: #c5dbf2;
+  outline: 2px dashed #4A90D9;
+  outline-offset: -2px;
+}
+
+.col-name {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.col-name .file-name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.col-size {
+  width: 100px;
+  text-align: right;
+  padding-right: 12px;
+  color: #555;
+}
+
+.col-date {
+  width: 180px;
+  color: #555;
+}
+
+.col-type {
+  width: 120px;
+  color: #555;
+}
+
+/* Grid view */
+.file-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+  padding: 16px;
+}
+
+.file-grid-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 8px;
+  border-radius: 6px;
+  cursor: default;
+  transition: background 0.1s;
+  text-align: center;
+}
+
+.file-grid-item:hover {
+  background: #f0f0f2;
+}
+
+.file-grid-item.selected {
+  background: #d4e4f7;
+}
+
+.file-grid-icon {
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-grid-name {
+  font-size: 11px;
+  line-height: 1.3;
+  word-break: break-all;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #ccc;
+  gap: 12px;
+}
+
+.empty-icon {
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 14px;
+  color: #999;
+}
+
+/* Column (browser) view */
+.file-columns {
+  display: flex;
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  height: 100%;
+}
+
+.file-column {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #e5e5e5;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.file-column:last-child {
+  border-right: none;
+}
+
+.file-column-header {
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #86868b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #e5e5e5;
+  background: #fafafa;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-column-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.file-column-empty {
+  padding: 20px;
+  text-align: center;
+  color: #bbb;
+  font-size: 12px;
+}
+
+.file-column-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  cursor: default;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.file-column-item:hover {
+  background: #f0f0f2;
+}
+
+.file-column-item.selected {
+  background: #d4e4f7;
+}
+
+.file-column-item.active {
+  background: #c5dbf2;
+  font-weight: 500;
+}
+
+.file-column-item-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.file-column-item.focused {
+  outline: 1px dotted #4A90D9;
+  outline-offset: -1px;
+}
+
+/* Column resize handle */
+.file-column-resize-handle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: col-resize;
+  z-index: 5;
+}
+
+.file-column-resize-handle:hover {
+  background: #4A90D9;
+}
+
+/* Group headers */
+.file-group-header {
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #86868b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: #f5f5f7;
+  border-bottom: 1px solid #e5e5e5;
+  position: sticky;
+  top: 29px;
+  z-index: 1;
+}

@@ -1,0 +1,30 @@
+.context-menu {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  padding: 4px;
+  min-width: 180px;
+  max-width: 260px;
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: default;
+  font-size: 13px;
+  color: #333;
+}
+
+.context-menu-item:hover {
+  background: #d4e4f7;
+}
+
+.context-menu-separator {
+  height: 1px;
+  background: #e5e5e5;
+  margin: 4px 8px;
+}

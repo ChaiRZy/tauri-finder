@@ -1,0 +1,131 @@
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.dialog {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  width: 380px;
+  max-width: 90vw;
+  overflow: hidden;
+}
+
+.dialog-wide {
+  width: 480px;
+}
+
+.dialog-header {
+  padding: 16px 20px 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #1d1d1f;
+}
+
+.dialog-body {
+  padding: 8px 20px 16px;
+}
+
+.dialog-label {
+  display: block;
+  font-size: 12px;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.dialog-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #d4d4d8;
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.dialog-input:focus {
+  border-color: #4A90D9;
+  box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.2);
+}
+
+.dialog-error {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid #e5e5e5;
+  background: #fafafa;
+}
+
+.dialog-btn {
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  border: 1px solid #d4d4d8;
+  background: #fff;
+  color: #333;
+}
+
+.dialog-btn:hover {
+  background: #f0f0f2;
+}
+
+.dialog-btn-primary {
+  background: #4A90D9;
+  color: #fff;
+  border-color: #4A90D9;
+}
+
+.dialog-btn-primary:hover {
+  background: #3a7bc8;
+}
+
+/* Properties specific */
+.props-icon-area {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.props-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.props-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.props-label {
+  font-size: 12px;
+  color: #86868b;
+  flex-shrink: 0;
+  min-width: 80px;
+}
+
+.props-value {
+  font-size: 12px;
+  color: #333;
+  text-align: right;
+  word-break: break-all;
+}
+
+.path-value {
+  font-size: 11px;
+}

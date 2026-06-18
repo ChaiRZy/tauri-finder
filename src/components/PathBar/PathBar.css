@@ -1,0 +1,73 @@
+.pathbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-bottom: 1px solid #e5e5e5;
+  background: #fafafa;
+  min-height: 36px;
+}
+
+.pathbar-nav {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.pathbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #555;
+}
+
+.pathbar-btn:hover:not(:disabled) {
+  background: #e5e5e7;
+}
+
+.pathbar-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.pathbar-breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.breadcrumb-segment {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.breadcrumb-sep {
+  color: #999;
+  margin: 0 2px;
+}
+
+.breadcrumb-link {
+  padding: 2px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  color: #555;
+  font-size: 13px;
+}
+
+.breadcrumb-link:hover {
+  background: #e5e5e7;
+}
+
+.breadcrumb-link.active {
+  color: #1d1d1f;
+  font-weight: 500;
+}
