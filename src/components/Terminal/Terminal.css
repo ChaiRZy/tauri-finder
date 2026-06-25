@@ -1,40 +1,17 @@
 .terminal-wrapper {
-  flex-direction: column;
-  flex-shrink: 0;
-  position: relative;
-}
-
-.terminal-drag-handle {
-  height: 4px;
-  cursor: row-resize;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
   position: relative;
-  z-index: 1;
-  flex-shrink: 0;
-}
-
-.terminal-drag-handle:hover .terminal-drag-bar,
-.terminal-drag-handle:active .terminal-drag-bar {
-  background: #4A90D9;
-}
-
-.terminal-drag-bar {
-  width: 48px;
-  height: 2px;
-  border-radius: 1px;
-  background: #555;
-  transition: background 0.15s;
 }
 
 .terminal-panel {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid #333;
-  background: #1e1e1e;
+  flex: 1;
   min-height: 0;
+  background: #1e1e1e;
 }
 
 .terminal-header {
@@ -133,4 +110,55 @@
 
 .terminal-xterm-instance .xterm {
   height: 100%;
+}
+
+.terminal-header-right {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-right: 6px;
+  flex-shrink: 0;
+}
+
+.terminal-settings-btn {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  border-radius: 3px;
+}
+
+.terminal-settings-btn:hover {
+  color: #fff;
+  background: #3c3c3c;
+}
+
+.terminal-settings-panel {
+  background: #2d2d2d;
+  border-bottom: 1px solid #3c3c3c;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.terminal-settings-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.terminal-settings-label {
+  font-size: 12px;
+  color: #aaa;
+  white-space: nowrap;
+}
+
+.terminal-settings-divider {
+  height: 1px;
+  background: #3c3c3c;
+  margin: 2px 0;
 }

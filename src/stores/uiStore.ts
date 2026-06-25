@@ -1,10 +1,13 @@
 import { create } from 'zustand';
-import type { ViewMode, ClipboardState, ContextMenuState, DialogState, FileEntry, ContextMenuConfig, ContextMenuItemId, ShellType, QuickCommand } from '../types/file';
+import type { ViewMode, ClipboardState, ContextMenuState, DialogState, FileEntry, ContextMenuConfig, ContextMenuItemId, ShellType, QuickCommand, CustomShell } from '../types/file';
 import { DEFAULT_CONTEXT_MENU_CONFIG, DEFAULT_SHELL } from '../types/file';
+import { usePluginStore } from '../plugins/pluginStore';
 
 const MENU_CONFIG_KEY = 'finder-context-menu-config';
 const QUICK_COMMANDS_KEY = 'finder-quick-commands';
 const SHELL_TYPE_KEY = 'finder-shell-type';
+const DEFAULT_SHELL_KEY = 'finder-default-shell';
+const CUSTOM_SHELLS_KEY = 'finder-custom-shells';
 
 function loadMenuConfig(): ContextMenuConfig {
   try {
@@ -42,6 +45,30 @@ function saveShellType(type: ShellType) {
   localStorage.setItem(SHELL_TYPE_KEY, type);
 }
 
+function loadDefaultShell(): ShellType {
+  try {
+    const raw = localStorage.getItem(DEFAULT_SHELL_KEY);
+    if (raw) return raw as ShellType;
+  } catch {}
+  return DEFAULT_SHELL;
+}
+
+function saveDefaultShell(type: ShellType) {
+  localStorage.setItem(DEFAULT_SHELL_KEY, type);
+}
+
+function loadCustomShells(): CustomShell[] {
+  try {
+    const raw = localStorage.getItem(CUSTOM_SHELLS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return [];
+}
+
+function saveCustomShells(shells: CustomShell[]) {
+  localStorage.setItem(CUSTOM_SHELLS_KEY, JSON.stringify(shells));
+}
+
 interface UiStore {
   viewMode: ViewMode;
   selectedPaths: Set<string>;
@@ -50,7 +77,7 @@ interface UiStore {
   dialog: DialogState | null;
   searchQuery: string;
   showSearchBar: boolean;
-  showPreview: boolean;
+  showActivityBar: boolean;
   contextMenuConfig: ContextMenuConfig;
 
   setViewMode: (mode: ViewMode) => void;
@@ -66,10 +93,9 @@ interface UiStore {
   closeDialog: () => void;
   setSearchQuery: (query: string) => void;
   toggleSearchBar: () => void;
-  togglePreview: () => void;
+  toggleActivityBar: () => void;
   toggleContextMenuItem: (id: ContextMenuItemId) => void;
-  showTerminal: boolean;
-  toggleTerminal: () => void;
+
   shellType: ShellType;
   setShellType: (type: ShellType) => void;
   quickCommands: QuickCommand[];
@@ -78,6 +104,11 @@ interface UiStore {
   terminalCommand: string | null;
   runInTerminal: (cmd: string) => void;
   clearTerminalCommand: () => void;
+  defaultShell: ShellType;
+  setDefaultShell: (type: ShellType) => void;
+  customShells: CustomShell[];
+  addCustomShell: (shell: CustomShell) => void;
+  removeCustomShell: (id: string) => void;
 }
 
 export const useUiStore = create<UiStore>((set) => ({
@@ -88,10 +119,11 @@ export const useUiStore = create<UiStore>((set) => ({
   dialog: null,
   searchQuery: '',
   showSearchBar: true,
-  showPreview: false,
+  showActivityBar: true,
   contextMenuConfig: loadMenuConfig(),
-  showTerminal: false,
   shellType: loadShellType(),
+  defaultShell: loadDefaultShell(),
+  customShells: loadCustomShells(),
   quickCommands: loadQuickCommands(),
   terminalCommand: null,
 
@@ -130,7 +162,7 @@ export const useUiStore = create<UiStore>((set) => ({
 
   toggleSearchBar: () => set((state) => ({ showSearchBar: !state.showSearchBar })),
 
-  togglePreview: () => set((state) => ({ showPreview: !state.showPreview })),
+  toggleActivityBar: () => set((state) => ({ showActivityBar: !state.showActivityBar })),
 
   toggleContextMenuItem: (id) => set((state) => {
     const next = {
@@ -139,8 +171,6 @@ export const useUiStore = create<UiStore>((set) => ({
     saveMenuConfig(next);
     return { contextMenuConfig: next };
   }),
-
-  toggleTerminal: () => set((state) => ({ showTerminal: !state.showTerminal })),
 
   setShellType: (type) => {
     saveShellType(type);
@@ -159,7 +189,27 @@ export const useUiStore = create<UiStore>((set) => ({
     return { quickCommands: next };
   }),
 
-  runInTerminal: (cmd) => set({ terminalCommand: cmd, showTerminal: true }),
+  runInTerminal: (cmd) => {
+    set({ terminalCommand: cmd });
+    usePluginStore.getState().showPlugin('terminal');
+  },
 
   clearTerminalCommand: () => set({ terminalCommand: null }),
+
+  setDefaultShell: (type) => {
+    saveDefaultShell(type);
+    set({ defaultShell: type });
+  },
+
+  addCustomShell: (shell) => set((state) => {
+    const next = [...state.customShells, shell];
+    saveCustomShells(next);
+    return { customShells: next };
+  }),
+
+  removeCustomShell: (id) => set((state) => {
+    const next = state.customShells.filter(s => s.id !== id);
+    saveCustomShells(next);
+    return { customShells: next };
+  }),
 }));

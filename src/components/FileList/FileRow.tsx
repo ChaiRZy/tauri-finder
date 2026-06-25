@@ -5,6 +5,7 @@ import type { FileEntry } from '../../types/file';
 import { useFileStore } from '../../stores/fileStore';
 import { useTagStore } from '../../stores/tagStore';
 import { useFileSystem } from '../../hooks/useFileSystem';
+import { useGitStatus } from '../../hooks/useGitStatus';
 import './FileList.css';
 
 interface FileRowProps {
@@ -20,10 +21,18 @@ export default function FileRow({ entry, selected, onSelect, onDoubleClick, onCo
   const folderTags = useTagStore((s) => s.folderTags);
   const { moveItems } = useFileSystem();
   const refresh = useFileStore((s) => s.refresh);
+  const currentDir = useFileStore((s) => s.currentDir);
+  const { gitStatus } = useGitStatus(currentDir);
   const tagIds = entry.is_dir ? (folderTags[entry.path] || []) : [];
   const entryTags = tagIds.map((id) => tagDefs.find((t) => t.id === id)).filter(Boolean);
 
   const [dragOver, setDragOver] = useState(false);
+
+  // Compute relative path for git status lookup
+  const relativePath = currentDir
+    ? entry.path.replace(currentDir.replace(/\\/g, '/'), '').replace(/^[/\\]+/, '')
+    : entry.name;
+  const gitInfo = gitStatus[relativePath] ?? gitStatus[entry.name];
 
   const handleDragStart = useCallback((e: React.DragEvent) => {
     e.dataTransfer.effectAllowed = 'move';
@@ -81,6 +90,12 @@ export default function FileRow({ entry, selected, onSelect, onDoubleClick, onCo
       onDrop={handleDrop}
     >
       <span className="col-name">
+        {gitInfo && (
+          <span
+            className={`git-indicator git-indicator--${gitInfo.status}`}
+            title={`${gitInfo.status}${gitInfo.staged ? ' (staged)' : ''}`}
+          />
+        )}
         <FileIcon entry={entry} size={18} />
         <span className="file-name-text">{entry.name}</span>
         {entryTags.length > 0 && (

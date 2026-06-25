@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useMemo } from 'react';
 import { openPath } from '@tauri-apps/plugin-opener';
 import { useFileStore } from '../../stores/fileStore';
 import { useUiStore } from '../../stores/uiStore';
@@ -6,6 +6,7 @@ import FileRow from './FileRow';
 import FileGrid from './FileGrid';
 import FileColumns from './FileColumns';
 import { groupEntries } from '../../utils/formatters';
+import { fuzzyFilter } from '../../utils/fuzzyMatch';
 import './FileList.css';
 
 export default function FileList() {
@@ -22,10 +23,13 @@ export default function FileList() {
   const clearSelection = useUiStore((s) => s.clearSelection);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Filter entries based on search query
-  const filtered = searchQuery
-    ? entries.filter(e => e.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    : entries;
+  // Filter entries based on fuzzy search (was: exact contains match)
+  const filtered = useMemo(() =>
+    searchQuery
+      ? fuzzyFilter(entries, searchQuery, (e) => e.name)
+      : entries,
+    [entries, searchQuery],
+  );
 
   const handleDoubleClick = (entry: { is_dir: boolean; path: string }) => {
     if (entry.is_dir) {
@@ -68,7 +72,7 @@ export default function FileList() {
         <FileColumns
           columns={searchQuery ? columns.map((col, i) => {
             if (i < columns.length - 1) return col;
-            return { ...col, entries: col.entries.filter(e => e.name.toLowerCase().includes(searchQuery.toLowerCase())) };
+            return { ...col, entries: fuzzyFilter(col.entries, searchQuery, (e) => e.name) };
           }) : columns}
           selectedPaths={selectedPaths}
           onSelect={(path) => toggleSelection(path)}

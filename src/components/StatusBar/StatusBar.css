@@ -3,10 +3,10 @@
   align-items: center;
   height: 26px;
   padding: 0 12px;
-  background: #f5f5f7;
-  border-top: 1px solid #e0e0e0;
+  background: var(--bg-statusbar);
+  border-top: 1px solid var(--border);
   font-size: 11px;
-  color: #666;
+  color: var(--text-statusbar);
   flex-shrink: 0;
 }
 
@@ -44,16 +44,18 @@
   background: transparent;
   border-radius: 4px;
   cursor: pointer;
-  color: #555;
+  color: var(--text-statusbar);
+  opacity: 0.8;
 }
 
 .statusbar-btn:hover {
-  background: #e0e0e2;
-  color: #333;
+  background: rgba(255,255,255,0.15);
+  opacity: 1;
 }
 
 .statusbar-btn.active {
-  color: #4A90D9;
+  color: var(--accent);
+  opacity: 1;
 }
 
 .statusbar-quick {

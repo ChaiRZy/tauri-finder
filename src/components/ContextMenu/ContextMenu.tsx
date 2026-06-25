@@ -1,6 +1,8 @@
+import { useMemo } from 'react';
 import { useUiStore } from '../../stores/uiStore';
 import { useFileStore } from '../../stores/fileStore';
 import { useFileSystem } from '../../hooks/useFileSystem';
+import { getAllPlugins } from '../../plugins/registry';
 import { Settings, FolderPlus, FilePenLine, Trash2, Copy, Scissors, ClipboardPaste, Info, Tags, ExternalLink, FolderDown } from 'lucide-react';
 import type { ContextMenuItemId } from '../../types/file';
 import './ContextMenu.css';
@@ -17,12 +19,26 @@ export default function ContextMenu() {
   const { deleteItem, copyItems, moveItems } = useFileSystem();
   const addTab = useFileStore((s) => s.addTab);
 
-  if (!contextMenu) return null;
-
-  const hasSelection = contextMenu.entries.length > 0 && selectedPaths.size > 0;
-  const singleFile = contextMenu.entries.length === 1;
-  const entry = contextMenu.entries[0];
+  const hasSelection = contextMenu ? contextMenu.entries.length > 0 && selectedPaths.size > 0 : false;
+  const singleFile = contextMenu ? contextMenu.entries.length === 1 : false;
+  const entry = contextMenu ? contextMenu.entries[0] : undefined;
   const enabled = menuConfig.items;
+
+  /* ── 插件贡献的右键菜单项 ── */
+  const pluginMenuItems = useMemo(() => {
+    return getAllPlugins().flatMap((p) =>
+      (p.contextMenuItems ?? []).filter((item) => {
+        switch (item.when) {
+          case 'has-selection': return hasSelection;
+          case 'single-selection': return hasSelection && singleFile;
+          case 'empty-area': return !hasSelection;
+          case 'always': return true;
+        }
+      }),
+    );
+  }, [hasSelection, singleFile]);
+
+  if (!contextMenu) return null;
 
   const style: React.CSSProperties = {
     position: 'fixed',
@@ -154,6 +170,21 @@ export default function ContextMenu() {
             <Tags size={14} />
             <span>Tags...</span>
           </div>
+        </>
+      )}
+
+      {/* 插件贡献的菜单项 */}
+      {pluginMenuItems.length > 0 && (
+        <>
+          <div className="context-menu-separator" />
+          {pluginMenuItems.map((item) => (
+            <div key={item.id} className="context-menu-item" onClick={() => handleAction(() => {
+              item.action({ selectedEntries: contextMenu.entries, currentDir: currentDir ?? '' });
+            })}>
+              {item.icon}
+              <span>{item.label}</span>
+            </div>
+          ))}
         </>
       )}
 

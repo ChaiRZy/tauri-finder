@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useFileStore } from '../../stores/fileStore';
 import { getSystemDirs, getDrives } from '../../utils/constants';
 import type { FileEntry } from '../../types/file';
@@ -12,18 +12,6 @@ interface CtxMenu {
   path: string;
 }
 
-const SIDEBAR_WIDTH_KEY = 'finder-sidebar-width';
-const MIN_SIDEBAR = 140;
-const MAX_SIDEBAR = 400;
-const DEFAULT_SIDEBAR = 220;
-
-function loadSidebarWidth(): number {
-  try {
-    const v = parseInt(localStorage.getItem(SIDEBAR_WIDTH_KEY) || '', 10);
-    return isNaN(v) ? DEFAULT_SIDEBAR : Math.max(MIN_SIDEBAR, Math.min(MAX_SIDEBAR, v));
-  } catch { return DEFAULT_SIDEBAR; }
-}
-
 export default function Sidebar() {
   const navigateTo = useFileStore((s) => s.navigateTo);
   const addTab = useFileStore((s) => s.addTab);
@@ -32,9 +20,7 @@ export default function Sidebar() {
   const [drives, setDrives] = useState<string[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [ctxMenu, setCtxMenu] = useState<CtxMenu | null>(null);
-  const [sidebarWidth, setSidebarWidth] = useState(loadSidebarWidth);
   const menuRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef(false);
 
   useEffect(() => {
     getSystemDirs().then(setSystemDirs).catch(() => {});
@@ -44,27 +30,6 @@ export default function Sidebar() {
       try { setFavorites(JSON.parse(saved)); } catch {}
     }
   }, []);
-
-  // Sidebar resize drag
-  const onResizeStart = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    dragRef.current = true;
-    const startX = e.clientX;
-    const startW = sidebarWidth;
-    const onMove = (ev: MouseEvent) => {
-      if (!dragRef.current) return;
-      const newW = Math.max(MIN_SIDEBAR, Math.min(MAX_SIDEBAR, startW + ev.clientX - startX));
-      setSidebarWidth(newW);
-      localStorage.setItem(SIDEBAR_WIDTH_KEY, String(newW));
-    };
-    const onUp = () => {
-      dragRef.current = false;
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-    };
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-  }, [sidebarWidth]);
 
   // Close context menu on outside click
   useEffect(() => {
@@ -105,6 +70,7 @@ export default function Sidebar() {
 
   const navItem = (path: string, label: string, icon: React.ReactNode, isFav?: boolean) => (
     <div
+      key={path}
       className={`sidebar-item ${isActive(path) ? 'active' : ''}`}
       onClick={() => navigateTo(path)}
       onContextMenu={(e) => {
@@ -119,7 +85,7 @@ export default function Sidebar() {
   );
 
   return (
-    <div className="sidebar" style={{ width: sidebarWidth, minWidth: sidebarWidth }}>
+    <div className="sidebar">
 
       {favorites.length > 0 && (
         <div className="sidebar-section">
@@ -203,8 +169,6 @@ export default function Sidebar() {
         </>
       )}
 
-      {/* Resize handle */}
-      <div className="sidebar-resize-handle" onMouseDown={onResizeStart} />
     </div>
   );
 }

@@ -2,8 +2,8 @@
   display: flex;
   align-items: center;
   padding: 4px 8px;
-  border-bottom: 1px solid #e5e5e5;
-  background: #f0f0f2;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-toolbar);
   min-height: 36px;
   gap: 4px;
 }
@@ -12,8 +12,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  flex: 1;
-  min-width: 0;
+  flex-shrink: 0;
 }
 
 .toolbar-right {
@@ -40,26 +39,12 @@
   padding: 0;
 }
 
-.win-close {
-  background: #ff5f57;
-  border: 1px solid #e2463f;
-}
+.win-close { background: #ff5f57; border: 1px solid #e2463f; }
+.win-minimize { background: #febc2e; border: 1px solid #dda524; }
+.win-maximize { background: #28c840; border: 1px solid #19a82f; }
+.win-btn:hover { filter: brightness(0.85); }
 
-.win-minimize {
-  background: #febc2e;
-  border: 1px solid #dda524;
-}
-
-.win-maximize {
-  background: #28c840;
-  border: 1px solid #19a82f;
-}
-
-.win-btn:hover {
-  filter: brightness(0.85);
-}
-
-/* Breadcrumbs in toolbar */
+/* Breadcrumbs in toolbar - also serves as drag region */
 .toolbar-breadcrumbs {
   display: flex;
   align-items: center;
@@ -67,6 +52,8 @@
   overflow: hidden;
   flex: 1;
   min-width: 0;
+  height: 100%;
+  padding: 0 8px;
 }
 
 .tb-breadcrumb {
@@ -77,55 +64,57 @@
 
 .tb-breadcrumb-sep {
   margin: 0 3px;
-  color: #999;
+  color: var(--text-toolbar);
+  opacity: 0.5;
   font-size: 14px;
 }
 
 .tb-breadcrumb-link {
   font-size: 12px;
-  color: #555;
+  color: var(--text-toolbar);
+  opacity: 0.7;
   cursor: default;
-  padding: 1px 4px;
+  padding: 2px 4px;
   border-radius: 3px;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
 }
 
 .tb-breadcrumb-link:hover {
-  background: #e0e0e2;
-  color: #333;
+  background: var(--hover);
+  opacity: 1;
 }
 
 .tb-breadcrumb-link.active {
-  color: #1d1d1f;
+  color: var(--text-main);
+  opacity: 1;
   font-weight: 500;
 }
 
-/* Existing toolbar styles */
-.toolbar-label {
-  font-size: 11px;
-  color: #86868b;
-  margin-right: 2px;
-}
-
+/* Toolbar buttons */
 .toolbar-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 2px;
   padding: 3px 6px;
   border: none;
   background: none;
   border-radius: 4px;
   cursor: pointer;
-  color: #555;
+  color: var(--text-toolbar);
   font-size: 12px;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
 }
 
 .toolbar-btn:hover {
-  background: #e0e0e2;
+  background: var(--hover);
 }
 
 .toolbar-btn.active {
-  background: #d0d0d4;
-  color: #1d1d1f;
+  background: var(--selection);
+  color: var(--text-main);
 }
 
 .toolbar-btn:disabled {
@@ -136,25 +125,141 @@
 .toolbar-separator {
   width: 1px;
   height: 18px;
-  background: #d4d4d8;
+  background: var(--border);
   margin: 0 3px;
+  flex-shrink: 0;
 }
 
 .toolbar-select {
-  border: 1px solid #d4d4d8;
+  border: 1px solid var(--border);
   border-radius: 4px;
-  background: #fff;
+  background: var(--bg-main);
   padding: 2px 6px;
   font-size: 11px;
-  color: #333;
+  color: var(--text-main);
   cursor: pointer;
   outline: none;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
 }
 
 .toolbar-select:focus {
-  border-color: #4A90D9;
+  border-color: var(--accent);
 }
 
 .sort-order-indicator {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Dedicated window drag handle */
+.toolbar-drag {
+  width: 60px;
+  min-width: 60px;
+  height: 100%;
+  -webkit-app-region: drag;
+  app-region: drag;
+  flex-shrink: 0;
+}
+
+/* Plugin menu dropdown */
+.toolbar-plugin-menu {
+  position: relative;
+}
+
+.toolbar-menu-btn {
+  min-width: 28px;
+}
+
+.toolbar-menu-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  min-width: 200px;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  z-index: 1000;
+  padding: 4px 0;
+}
+
+.toolbar-menu-header {
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-toolbar);
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+}
+
+.toolbar-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--text-main);
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
+.toolbar-menu-item:hover {
+  background: var(--hover);
+}
+
+.toolbar-menu-item input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+
+.toolbar-menu-row {
+  display: flex;
+  align-items: center;
+}
+
+.toolbar-menu-row .toolbar-menu-item {
+  flex: 1;
+}
+
+.toolbar-menu-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  border-radius: 3px;
+  cursor: pointer;
+  color: var(--text-toolbar);
+  opacity: 0.5;
+  margin-right: 4px;
+}
+
+.toolbar-menu-icon-btn:hover {
+  opacity: 1;
+  color: #e5534b;
+  background: var(--hover);
+}
+
+.toolbar-menu-sep {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+.toolbar-preset-dropdown {
+  min-width: 220px;
+}
+
+.toolbar-menu-position {
+  margin-left: auto;
   font-size: 10px;
+  color: var(--text-toolbar);
+  opacity: 0.5;
+  text-transform: uppercase;
 }

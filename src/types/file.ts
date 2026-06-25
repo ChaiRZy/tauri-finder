@@ -29,6 +29,13 @@ export interface ContextMenuConfig {
 
 export type ShellType = 'cmd' | 'powershell' | 'gitbash';
 
+export interface CustomShell {
+  id: string;
+  name: string;
+  program: string;
+  args: string;
+}
+
 export interface QuickCommand {
   id: string;
   name: string;

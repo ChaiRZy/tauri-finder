@@ -1,4 +1,11 @@
+pub mod ai;
 pub mod clipboard;
+pub mod diff;
 pub mod file_ops;
+pub mod git;
+pub mod highlight;
+pub mod mcp;
 pub mod search;
 pub mod system;
+pub mod watcher;
+pub mod write_file;

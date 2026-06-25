@@ -1,8 +1,10 @@
-import { useCallback } from 'react';
-import { getCurrentWindow } from '@tauri-apps/api/window';
+import { useRef, useState, useEffect } from 'react';
 import { useUiStore } from '../../stores/uiStore';
+import { usePluginStore } from '../../plugins/pluginStore';
+import { getAllPlugins } from '../../plugins/registry';
 import { useFileStore } from '../../stores/fileStore';
-import { LayoutList, LayoutGrid, Columns3, ArrowUpDown, Search, FolderTree, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useLayoutPresetStore } from '../../stores/layoutPresetStore';
+import { LayoutList, LayoutGrid, Columns3, Search, ChevronLeft, ChevronRight, Menu, LayoutTemplate, Save, Trash2 } from 'lucide-react';
 import './Toolbar.css';
 
 export default function Toolbar() {
@@ -11,12 +13,21 @@ export default function Toolbar() {
   const setSortBy = useFileStore((s) => s.setSortBy);
   const sortBy = useFileStore((s) => s.sortBy);
   const sortOrder = useFileStore((s) => s.sortOrder);
-  const togglePreview = useUiStore((s) => s.togglePreview);
-  const showPreview = useUiStore((s) => s.showPreview);
   const showSearchBar = useUiStore((s) => s.showSearchBar);
   const toggleSearchBar = useUiStore((s) => s.toggleSearchBar);
-  const groupBy = useFileStore((s) => s.groupBy);
-  const toggleGroupBy = useFileStore((s) => s.toggleGroupBy);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [presetMenuOpen, setPresetMenuOpen] = useState(false);
+  const [savePresetName, setSavePresetName] = useState('');
+  const menuRef = useRef<HTMLDivElement>(null);
+  const presetMenuRef = useRef<HTMLDivElement>(null);
+
+  const visible = usePluginStore((s) => s.visible);
+  const togglePlugin = usePluginStore((s) => s.togglePlugin);
+  const presets = useLayoutPresetStore((s) => s.presets);
+  const activePresetId = useLayoutPresetStore((s) => s.activePresetId);
+  const applyPreset = useLayoutPresetStore((s) => s.applyPreset);
+  const saveCurrentAsPreset = useLayoutPresetStore((s) => s.saveCurrentAsPreset);
+  const deletePreset = useLayoutPresetStore((s) => s.deletePreset);
 
   const currentDir = useFileStore((s) => s.currentDir);
   const navigateTo = useFileStore((s) => s.navigateTo);
@@ -26,29 +37,29 @@ export default function Toolbar() {
   const historyIndex = useFileStore((s) => s.historyIndex);
   const history = useFileStore((s) => s.history);
 
-  const appWindow = getCurrentWindow();
-
-  const handleMinimize = useCallback(() => appWindow.minimize(), [appWindow]);
-  const handleMaximize = useCallback(() => appWindow.toggleMaximize(), [appWindow]);
-  const handleClose = useCallback(() => appWindow.close(), [appWindow]);
+  // 点击外部关闭菜单
+  useEffect(() => {
+    if (!menuOpen && !presetMenuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node) &&
+          presetMenuRef.current && !presetMenuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+        setPresetMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [menuOpen, presetMenuOpen]);
 
   if (!currentDir) return null;
 
   const segments = currentDir.replace(/\\/g, '/').split('/').filter(Boolean);
+  const plugins = getAllPlugins();
 
   return (
     <div className="toolbar">
-      {/* Left: window controls + nav + path */}
+      {/* Left: nav */}
       <div className="toolbar-left">
-        {/* Window controls (macOS-style) */}
-        <div className="window-controls">
-          <button className="win-btn win-close" onClick={handleClose} title="Close" />
-          <button className="win-btn win-minimize" onClick={handleMinimize} title="Minimize" />
-          <button className="win-btn win-maximize" onClick={handleMaximize} title="Maximize" />
-        </div>
-
-        <div className="toolbar-separator" />
-
         {/* Navigation */}
         <button className="toolbar-btn" onClick={goBack} disabled={historyIndex <= 0} title="Back">
           <ChevronLeft size={14} />
@@ -61,30 +72,28 @@ export default function Toolbar() {
             <path d="M8 3L3 8h3v5h4V8h3L8 3z" fill="currentColor" />
           </svg>
         </button>
-
-        <div className="toolbar-separator" />
-
-        {/* Breadcrumb / Address bar */}
-        <div className="toolbar-breadcrumbs">
-          {segments.map((seg, i) => {
-            const path = segments.slice(0, i + 1).join('/');
-            const fullPath = currentDir.startsWith('/') ? '/' + path : path;
-            return (
-              <span key={fullPath} className="tb-breadcrumb">
-                {i > 0 && <span className="tb-breadcrumb-sep">›</span>}
-                <span
-                  className={`tb-breadcrumb-link ${i === segments.length - 1 ? 'active' : ''}`}
-                  onClick={() => navigateTo(fullPath)}
-                >
-                  {seg}
-                </span>
-              </span>
-            );
-          })}
-        </div>
       </div>
 
-      {/* Right: view mode, sort, search, preview */}
+      {/* Breadcrumb */}
+      <div className="toolbar-breadcrumbs">
+        {segments.map((seg, i) => {
+          const path = segments.slice(0, i + 1).join('/');
+          const fullPath = currentDir.startsWith('/') ? '/' + path : path;
+          return (
+            <span key={fullPath} className="tb-breadcrumb">
+              {i > 0 && <span className="tb-breadcrumb-sep">›</span>}
+              <span
+                className={`tb-breadcrumb-link ${i === segments.length - 1 ? 'active' : ''}`}
+                onClick={() => navigateTo(fullPath)}
+              >
+                {seg}
+              </span>
+            </span>
+          );
+        })}
+      </div>
+
+      {/* Right: minimal actions + plugin menu */}
       <div className="toolbar-right">
         <button
           className={`toolbar-btn ${showSearchBar ? 'active' : ''}`}
@@ -94,42 +103,24 @@ export default function Toolbar() {
           <Search size={14} />
         </button>
 
-        <button
-          className={`toolbar-btn ${groupBy === 'type' ? 'active' : ''}`}
-          onClick={toggleGroupBy}
-          title={groupBy === 'type' ? 'Ungroup' : 'Group by type'}
-        >
-          <FolderTree size={14} />
-        </button>
-
         <div className="toolbar-separator" />
 
-        <span className="toolbar-label">View:</span>
-        <button
-          className={`toolbar-btn ${viewMode === 'list' ? 'active' : ''}`}
-          onClick={() => setViewMode('list')}
-          title="List view"
-        >
+        <button className={`toolbar-btn ${viewMode === 'list' ? 'active' : ''}`}
+          onClick={() => setViewMode('list')} title="List view">
           <LayoutList size={15} />
         </button>
-        <button
-          className={`toolbar-btn ${viewMode === 'grid' ? 'active' : ''}`}
-          onClick={() => setViewMode('grid')}
-          title="Grid view"
-        >
+        <button className={`toolbar-btn ${viewMode === 'grid' ? 'active' : ''}`}
+          onClick={() => setViewMode('grid')} title="Grid view">
           <LayoutGrid size={15} />
         </button>
-        <button
-          className={`toolbar-btn ${viewMode === 'columns' ? 'active' : ''}`}
-          onClick={() => setViewMode('columns')}
-          title="Column view"
-        >
+        <button className={`toolbar-btn ${viewMode === 'columns' ? 'active' : ''}`}
+          onClick={() => setViewMode('columns')} title="Column view">
           <Columns3 size={15} />
         </button>
 
         <div className="toolbar-separator" />
 
-        <span className="toolbar-label">Sort:</span>
+        {/* Sort */}
         <select
           className="toolbar-select"
           value={sortBy}
@@ -140,23 +131,105 @@ export default function Toolbar() {
           <option value="modified_at">Date</option>
         </select>
         <button className="toolbar-btn" onClick={() => useFileStore.getState().toggleSortOrder()} title="Toggle sort order">
-          <ArrowUpDown size={13} />
           <span className="sort-order-indicator">{sortOrder === 'asc' ? '↑' : '↓'}</span>
         </button>
 
         <div className="toolbar-separator" />
 
-        <button
-          className={`toolbar-btn ${showPreview ? 'active' : ''}`}
-          onClick={togglePreview}
-          title="Toggle preview panel"
-        >
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
-            <rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" strokeWidth="1.2" fill="none" />
-            <circle cx="6" cy="7" r="1.5" fill="currentColor" />
-            <path d="M2 11l3-3 2 2 3-3 4 4" stroke="currentColor" strokeWidth="1.2" fill="none" />
-          </svg>
-        </button>
+        {/* Layout presets */}
+        <div className="toolbar-plugin-menu" ref={presetMenuRef}>
+          <button
+            className={`toolbar-btn ${presetMenuOpen ? 'active' : ''}`}
+            onClick={() => setPresetMenuOpen((v) => !v)}
+            title="Layout presets"
+          >
+            <LayoutTemplate size={15} />
+          </button>
+          {presetMenuOpen && (
+            <div className="toolbar-menu-dropdown toolbar-preset-dropdown">
+              <div className="toolbar-menu-header">Layout Presets</div>
+              {presets.map((p) => (
+                <div key={p.id} className="toolbar-menu-row">
+                  <label
+                    className="toolbar-menu-item"
+                    style={{ flex: 1 }}
+                    onClick={() => { applyPreset(p.id); setPresetMenuOpen(false); }}
+                  >
+                    <span style={{ fontWeight: activePresetId === p.id ? 600 : 400 }}>
+                      {activePresetId === p.id ? '✓ ' : ''}{p.name}
+                    </span>
+                  </label>
+                  <button
+                    className="toolbar-menu-icon-btn"
+                    onClick={() => deletePreset(p.id)}
+                    title="Delete preset"
+                  >
+                    <Trash2 size={11} />
+                  </button>
+                </div>
+              ))}
+              {presets.length === 0 && (
+                <div style={{ padding: '8px 12px', fontSize: 11, color: '#888' }}>No presets saved</div>
+              )}
+              <div className="toolbar-menu-sep" />
+              <div style={{ display: 'flex', gap: 4, padding: '6px 8px' }}>
+                <input
+                  placeholder="Preset name..."
+                  value={savePresetName}
+                  onChange={(e) => setSavePresetName(e.target.value)}
+                  style={{
+                    flex: 1, padding: '2px 6px', fontSize: 11,
+                    border: '1px solid var(--border)', borderRadius: 3,
+                    background: 'var(--bg-main)', color: 'var(--text-main)', outline: 'none',
+                  }}
+                />
+                <button
+                  className="toolbar-btn"
+                  style={{ padding: '2px 8px' }}
+                  onClick={() => {
+                    if (savePresetName.trim()) {
+                      saveCurrentAsPreset(savePresetName.trim());
+                      setSavePresetName('');
+                      setPresetMenuOpen(false);
+                    }
+                  }}
+                  title="Save current layout"
+                >
+                  <Save size={12} />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="toolbar-separator" />
+
+        {/* Plugin menu */}
+        <div className="toolbar-plugin-menu" ref={menuRef}>
+          <button
+            className={`toolbar-btn toolbar-menu-btn ${menuOpen ? 'active' : ''}`}
+            onClick={() => setMenuOpen((v) => !v)}
+            title="Plugins"
+          >
+            <Menu size={15} />
+          </button>
+          {menuOpen && (
+            <div className="toolbar-menu-dropdown">
+              <div className="toolbar-menu-header">Plugins</div>
+              {plugins.map((p) => (
+                <label key={p.id} className="toolbar-menu-item">
+                  <input
+                    type="checkbox"
+                    checked={!!visible[p.id]}
+                    onChange={() => togglePlugin(p.id)}
+                  />
+                  <span>{p.title}</span>
+                  <span className="toolbar-menu-position">{p.position}</span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

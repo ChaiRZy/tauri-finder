@@ -1,0 +1,30 @@
+## 任务：tauri-specta 集成环境探测（只读）
+
+你的任务是为 tauri-specta 集成做环境探测。tauri-specta 是一个可以从 Rust 命令自动生成 TypeScript 类型安全调用函数的工具。
+
+### 需要探测的内容
+
+#### 1. Rust 命令签名清单
+读取 `src-tauri/src/commands/` 下的所有 Rust 文件（除了 watcher 模块），提取每个 Tauri 命令的：
+- 函数名
+- 参数类型和名称
+- 返回类型
+- 使用的结构体/模型（检查 models/）
+
+#### 2. 前端调用模式
+在 `src/` 下搜索所有 `invoke('` 调用，了解前端是如何调用 Rust 命令的。
+重点关注：调用格式、类型使用模式、是否有手动类型声明。
+
+#### 3. Cargo.toml 分析
+当前依赖列表，确认 specta 和 tauri-specta 的版本兼容性（Tauri v2）。
+
+#### 4. 风险点识别
+- 哪些命令有复杂返回类型（如 Result<Vec<复杂结构>, String>）
+- 有没有泛型参数
+- 文件读写相关命令的安全性
+
+### 约束
+- ⚠ **只读探测，禁止修改任何文件**
+- 输出写入 `exploration_findings.md`（路径在 context.json 中）
+- 格式：## 环境现状 / ## 关键发现 / ## 风险/不确定点
+- 最多 10 次工具调用

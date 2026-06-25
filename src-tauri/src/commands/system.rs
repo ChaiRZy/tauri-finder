@@ -3,6 +3,7 @@ use crate::models::file_entry::FileEntry;
 use std::path::PathBuf;
 
 /// Get the standard system directories (Desktop, Downloads, Documents, etc.).
+#[specta::specta]
 #[tauri::command]
 pub fn get_system_dirs() -> Result<Vec<FileEntry>, String> {
     let mut entries: Vec<FileEntry> = Vec::new();
@@ -52,6 +53,7 @@ fn dirs_data_dir(name: &str) -> Option<PathBuf> {
 
 /// Get the list of available drives on Windows (e.g. C:\, D:\).
 /// On non-Windows systems, returns the root "/" directory.
+#[specta::specta]
 #[tauri::command]
 pub fn get_drives() -> Result<Vec<String>, String> {
     let mut drives: Vec<String> = Vec::new();
@@ -75,6 +77,7 @@ pub fn get_drives() -> Result<Vec<String>, String> {
 }
 
 /// Get the current user's home directory path.
+#[specta::specta]
 #[tauri::command]
 pub fn get_home_dir() -> Result<String, String> {
     dirs::home_dir()
@@ -83,6 +86,7 @@ pub fn get_home_dir() -> Result<String, String> {
 }
 
 /// Read a text file's contents (first 10KB) for preview purposes.
+#[specta::specta]
 #[tauri::command]
 pub fn read_text_file(path: String) -> Result<String, String> {
     use std::fs;
@@ -98,4 +102,17 @@ pub fn read_text_file(path: String) -> Result<String, String> {
     buffer.truncate(n);
 
     String::from_utf8(buffer).map_err(|_| "File is not valid UTF-8 text".to_string())
+}
+
+/// Read raw bytes from a file (up to max_bytes).
+#[specta::specta]
+#[tauri::command]
+pub fn read_file_bytes(path: String, max_bytes: u32) -> Result<Vec<u8>, String> {
+    use std::io::Read;
+
+    let mut f = std::fs::File::open(&path).map_err(|e| e.to_string())?;
+    let mut buf = vec![0u8; max_bytes as usize];
+    let n = f.read(&mut buf).map_err(|e| e.to_string())?;
+    buf.truncate(n);
+    Ok(buf)
 }

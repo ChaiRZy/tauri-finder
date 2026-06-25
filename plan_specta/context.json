@@ -1,0 +1,11 @@
+{
+  "task": "tauri-specta\u96c6\u6210\u73af\u5883\u63a2\u6d4b",
+  "work_dir": "D:\\idea\\GenericAgent\\temp\\projects\\tauri-finder-c1d7876a\\plan_specta",
+  "project_dir": "D:\\project\\crz\\myDoc\\tauri-finder",
+  "cargo_toml": "D:\\project\\crz\\myDoc\\tauri-finder\\src-tauri\\Cargo.toml",
+  "lib_rs": "D:\\project\\crz\\myDoc\\tauri-finder\\src-tauri\\src\\lib.rs",
+  "commands_dir": "D:\\project\\crz\\myDoc\\tauri-finder\\src-tauri\\src\\commands",
+  "models_dir": "D:\\project\\crz\\myDoc\\tauri-finder\\src-tauri\\src\\models",
+  "frontend_invoke_patterns": "D:\\project\\crz\\myDoc\\tauri-finder\\src",
+  "output_file": "D:\\idea\\GenericAgent\\temp\\projects\\tauri-finder-c1d7876a\\plan_specta\\exploration_findings.md"
+}

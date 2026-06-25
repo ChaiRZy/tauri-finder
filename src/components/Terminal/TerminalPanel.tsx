@@ -1,24 +1,17 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Terminal as XtermTerminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
+import { WebglAddon } from '@xterm/addon-webgl';
+import { SearchAddon, ISearchOptions } from '@xterm/addon-search';
+import { WebLinksAddon } from '@xterm/addon-web-links';
+import { Unicode11Addon } from '@xterm/addon-unicode11';
 import { Command } from '@tauri-apps/plugin-shell';
 import { useUiStore } from '../../stores/uiStore';
 import { useFileStore } from '../../stores/fileStore';
 import type { ShellType } from '../../types/file';
+import { Settings, Plus, X, Search, ChevronUp, ChevronDown } from 'lucide-react';
 import '@xterm/xterm/css/xterm.css';
 import './Terminal.css';
-
-const HEIGHT_KEY = 'finder-terminal-height';
-const MIN_H = 80;
-const MAX_H = 600;
-const DEFAULT_H = 220;
-
-function loadHeight(): number {
-  try {
-    const v = parseInt(localStorage.getItem(HEIGHT_KEY) || '', 10);
-    return isNaN(v) ? DEFAULT_H : Math.max(MIN_H, Math.min(MAX_H, v));
-  } catch { return DEFAULT_H; }
-}
 
 let nextTabId = 1;
 function genId() { return `tab-${nextTabId++}`; }
@@ -33,24 +26,22 @@ interface TabState {
 }
 
 export default function TerminalPanel() {
-  const showTerminal = useUiStore((s) => s.showTerminal);
   const currentDir = useFileStore((s) => s.currentDir);
   const terminalCommand = useUiStore((s) => s.terminalCommand);
   const clearTerminalCommand = useUiStore((s) => s.clearTerminalCommand);
 
   const [tabs, setTabs] = useState<TabState[]>(() => [{
     id: genId(),
-    shellType: useUiStore.getState().shellType,
+    shellType: useUiStore.getState().defaultShell as ShellType,
     xterm: null,
     fitAddon: null,
     child: null,
     cmdObj: null,
   }]);
   const [activeTab, setActiveTab] = useState<string>(tabs[0].id);
-  const [height, setHeight] = useState(loadHeight);
-  const dragging = useRef(false);
   const termContainers = useRef<Record<string, HTMLDivElement | null>>({});
   const tabRefs = useRef<TabState[]>(tabs);
+  const xtermRefs = useRef<Record<string, XtermTerminal | null>>({});
   tabRefs.current = tabs;
 
   const updateTab = useCallback((id: string, patch: Partial<TabState>) => {
@@ -59,29 +50,45 @@ export default function TerminalPanel() {
 
   // Spawn a shell for a given tab
   const spawnShell = useCallback(async (tab: TabState) => {
-    const prog = tab.shellType === 'powershell' ? 'powershell' :
-                 tab.shellType === 'gitbash' ? 'bash' : 'cmd';
-    const args: string[] = tab.shellType === 'gitbash' ? ['--login'] : [];
+    const builtinShells: Record<string, { prog: string; args: string[] }> = {
+      cmd: { prog: 'cmd', args: [] },
+      powershell: { prog: 'powershell', args: [] },
+      gitbash: { prog: 'bash', args: ['--login'] },
+    };
+    const customShells = useUiStore.getState().customShells;
+    const cs = customShells.find(s => s.id === tab.shellType);
+    let prog: string;
+    let args: string[];
+    if (cs) {
+      prog = cs.program;
+      args = cs.args ? cs.args.split(' ').filter(Boolean) : [];
+    } else if (builtinShells[tab.shellType]) {
+      prog = builtinShells[tab.shellType].prog;
+      args = builtinShells[tab.shellType].args;
+    } else {
+      prog = 'cmd';
+      args = [];
+    }
     try {
       const cmd = Command.create(prog, args, { cwd: currentDir || undefined, encoding: 'raw' });
       updateTab(tab.id, { cmdObj: cmd });
 
       cmd.stdout.on('data', (data: Uint8Array) => {
-        const t = tabRefs.current.find((t) => t.id === tab.id);
-        if (t?.xterm) t.xterm.write(data);
+        const x = xtermRefs.current[tab.id];
+        if (x) x.write(data);
       });
       cmd.stderr.on('data', (data: Uint8Array) => {
-        const t = tabRefs.current.find((t) => t.id === tab.id);
-        if (t?.xterm) t.xterm.write(data);
+        const x = xtermRefs.current[tab.id];
+        if (x) x.write(data);
       });
       cmd.on('close', () => {
-        const t = tabRefs.current.find((t) => t.id === tab.id);
-        if (t?.xterm) t.xterm.write('\r\n\x1b[33m[shell exited]\x1b[0m\r\n');
+        const x = xtermRefs.current[tab.id];
+        if (x) x.write('\r\n\x1b[33m[shell exited]\x1b[0m\r\n');
         updateTab(tab.id, { child: null });
       });
       cmd.on('error', (err: string) => {
-        const t = tabRefs.current.find((t) => t.id === tab.id);
-        if (t?.xterm) t.xterm.write(`\r\n\x1b[31m[error: ${err}]\x1b[0m\r\n`);
+        const x = xtermRefs.current[tab.id];
+        if (x) x.write(`\r\n\x1b[31m[error: ${err}]\x1b[0m\r\n`);
       });
 
       const child = await cmd.spawn();
@@ -148,11 +155,21 @@ export default function TerminalPanel() {
         if (t?.child) t.child.write(data);
       });
 
+      // Focus terminal for keyboard input
+      term.focus();
+
       const ro = new ResizeObserver(() => {
-        try { fit.fit(); } catch {}
+        try {
+          fit.fit();
+          term.focus();
+        } catch {}
       });
       ro.observe(container);
 
+      // Also focus on window resize
+      window.addEventListener('resize', () => { try { term.focus(); } catch {} });
+
+      xtermRefs.current[tab.id] = term;
       updateTab(tab.id, { xterm: term, fitAddon: fit });
       spawnShell(tab);
 
@@ -172,15 +189,16 @@ export default function TerminalPanel() {
     };
   }, []);
 
-  // Fit terminal when shown
+  // Fit terminal + focus when tab changes
   useEffect(() => {
-    if (!showTerminal) return;
     setTimeout(() => {
       for (const tab of tabs) {
         try { tab.fitAddon?.fit(); } catch {}
       }
+      const active = tabs.find(t => t.id === activeTab);
+      if (active?.xterm) active.xterm.focus();
     }, 50);
-  }, [showTerminal, tabs]);
+  }, [tabs, activeTab]);
 
   // Send terminal commands
   useEffect(() => {
@@ -194,9 +212,10 @@ export default function TerminalPanel() {
 
   // Tab management
   const addTab = useCallback(() => {
+    const def = useUiStore.getState().defaultShell;
     const newTab: TabState = {
       id: genId(),
-      shellType: useUiStore.getState().shellType,
+      shellType: def as ShellType,
       xterm: null,
       fitAddon: null,
       child: null,
@@ -214,12 +233,13 @@ export default function TerminalPanel() {
       if (tab.child) { try { tab.child.kill(); } catch {} }
       if (tab.cmdObj) { tab.cmdObj.removeAllListeners(); }
       tab.xterm?.dispose();
+      delete xtermRefs.current[id];
       const next = prev.filter((t) => t.id !== id);
       if (next.length === 0) {
         // keep at least one tab
         const fresh: TabState = {
           id: genId(),
-          shellType: useUiStore.getState().shellType,
+          shellType: useUiStore.getState().defaultShell as ShellType,
           xterm: null,
           fitAddon: null,
           child: null,
@@ -236,39 +256,19 @@ export default function TerminalPanel() {
     });
   }, [activeTab]);
 
-  // Drag handle
-  const onDragStart = useCallback((e: React.MouseEvent) => {
-    dragging.current = true;
-    const startY = e.clientY;
-    const startH = height;
-    const onMove = (ev: MouseEvent) => {
-      if (!dragging.current) return;
-      const dy = startY - ev.clientY;
-      const newH = Math.max(MIN_H, Math.min(MAX_H, startH + dy));
-      setHeight(newH);
-      localStorage.setItem(HEIGHT_KEY, String(newH));
-      setTimeout(() => {
-        for (const tab of tabs) {
-          try { tab.fitAddon?.fit(); } catch {}
-        }
-      }, 0);
-    };
-    const onUp = () => {
-      dragging.current = false;
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-    };
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-    e.preventDefault();
-  }, [height, tabs]);
+  const [showSettings, setShowSettings] = useState(false);
+  const defaultShell = useUiStore((s) => s.defaultShell);
+  const setDefaultShell = useUiStore((s) => s.setDefaultShell);
+  const customShells = useUiStore((s) => s.customShells);
+  const addCustomShell = useUiStore((s) => s.addCustomShell);
+  const removeCustomShell = useUiStore((s) => s.removeCustomShell);
+  const [newShellName, setNewShellName] = useState('');
+  const [newShellProg, setNewShellProg] = useState('');
+  const [newShellArgs, setNewShellArgs] = useState('');
 
   return (
-    <div className="terminal-wrapper" style={{ display: showTerminal ? 'flex' : 'none' }}>
-      <div className="terminal-drag-handle" onMouseDown={onDragStart}>
-        <div className="terminal-drag-bar" />
-      </div>
-      <div className="terminal-panel" style={{ height }}>
+    <div className="terminal-wrapper">
+      <div className="terminal-panel">
         <div className="terminal-header">
           <div className="terminal-tabs">
             {tabs.map((tab) => (
@@ -278,10 +278,10 @@ export default function TerminalPanel() {
                 onClick={() => setActiveTab(tab.id)}
               >
                 <span className="terminal-tab-icon">
-                  {tab.shellType === 'powershell' ? 'PS' : tab.shellType === 'gitbash' ? 'BASH' : 'CMD'}
+                  {tab.shellType === 'powershell' ? 'PS' : tab.shellType === 'gitbash' ? 'BASH' : tab.shellType === 'cmd' ? 'CMD' : 'SH'}
                 </span>
                 <span className="terminal-tab-name">
-                  {tab.shellType === 'powershell' ? 'PowerShell' : tab.shellType === 'gitbash' ? 'Git Bash' : 'cmd'}
+                  {tab.shellType === 'powershell' ? 'PowerShell' : tab.shellType === 'gitbash' ? 'Git Bash' : tab.shellType === 'cmd' ? 'cmd' : customShells.find(s => s.id === tab.shellType)?.name || tab.shellType}
                 </span>
                 {tabs.length > 1 && (
                   <button
@@ -295,7 +295,55 @@ export default function TerminalPanel() {
             ))}
             <button className="terminal-tab-add" onClick={addTab} title="New tab">+</button>
           </div>
+          <div className="terminal-header-right">
+            <button className="terminal-settings-btn" onClick={() => setShowSettings(!showSettings)} title="Terminal settings">
+              <Settings size={13} />
+            </button>
+          </div>
         </div>
+
+        {showSettings && (
+          <div className="terminal-settings-panel">
+            <div className="terminal-settings-row">
+              <span className="terminal-settings-label">Default shell:</span>
+              <select
+                className="toolbar-select"
+                value={defaultShell}
+                onChange={(e) => setDefaultShell(e.target.value as ShellType)}
+                style={{ fontSize: 11, padding: '2px 6px' }}
+              >
+                <option value="cmd">cmd</option>
+                <option value="powershell">PowerShell</option>
+                <option value="gitbash">Git Bash</option>
+                {customShells.map((cs) => (
+                  <option key={cs.id} value={cs.id}>{cs.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="terminal-settings-divider" />
+            <div className="terminal-settings-row">
+              <span className="terminal-settings-label">Custom shells:</span>
+            </div>
+            {customShells.map((cs) => (
+              <div key={cs.id} className="terminal-settings-row" style={{ paddingLeft: 12 }}>
+                <span style={{ flex: 1, fontSize: 12 }}>{cs.name} ({cs.program} {cs.args})</span>
+                <button className="terminal-tab-close" onClick={() => removeCustomShell(cs.id)}><X size={11} /></button>
+              </div>
+            ))}
+            <div className="terminal-settings-row" style={{ gap: 4, flexWrap: 'wrap' }}>
+              <input className="dialog-input" style={{ width: 80, fontSize: 11, padding: '3px 6px' }} placeholder="Name" value={newShellName} onChange={e => setNewShellName(e.target.value)} />
+              <input className="dialog-input" style={{ width: 120, fontSize: 11, padding: '3px 6px' }} placeholder="Program (e.g. wsl)" value={newShellProg} onChange={e => setNewShellProg(e.target.value)} />
+              <input className="dialog-input" style={{ width: 100, fontSize: 11, padding: '3px 6px' }} placeholder="Args" value={newShellArgs} onChange={e => setNewShellArgs(e.target.value)} />
+              <button className="toolbar-btn" onClick={() => {
+                if (newShellProg.trim()) {
+                  addCustomShell({ id: `custom-${Date.now()}`, name: newShellName.trim() || newShellProg.trim(), program: newShellProg.trim(), args: newShellArgs.trim() });
+                  setNewShellName(''); setNewShellProg(''); setNewShellArgs('');
+                }
+              }}><Plus size={12} /></button>
+            </div>
+          </div>
+        )}
+
         <div className="terminal-xterm" style={{ position: 'relative' }}>
           {tabs.map((tab) => (
             <div

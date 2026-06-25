@@ -1,0 +1,17 @@
+{
+  "task_description": "为tauri-finder引入tauri-specta类型安全层",
+  "plan_file": "D:\\idea\\GenericAgent\\temp\\projects\\tauri-finder-c1d7876a\\plan_specta\\plan.md",
+  "task_type": "code",
+  "deliverables": [
+    {"type": "Cargo.toml修改", "path": "D:\\project\\crz\\myDoc\\tauri-finder\\src-tauri\\Cargo.toml", "expected": "添加specta+tauri-specta依赖"},
+    {"type": "Rust模型注解", "path": "D:\\project\\crz\\myDoc\\tauri-finder\\src-tauri\\src\\models", "expected": "所有共享结构体添加#[derive(Type)]"},
+    {"type": "Rust命令注解", "path": "D:\\project\\crz\\myDoc\\tauri-finder\\src-tauri\\src\\commands", "expected": "除mcp外所有命令加#[specta]"},
+    {"type": "生成的TS类型", "path": "D:\\project\\crz\\myDoc\\tauri-finder\\src\\types\\commands.ts", "expected": "自动生成的类型安全调用包装"},
+    {"type": "前端迁移", "path": "D:\\project\\crz\\myDoc\\tauri-finder\\src", "expected": "35处invoke替换为类型安全调用"}
+  ],
+  "required_checks": [
+    {"check": "cargo check通过", "tool": "code_run"},
+    {"check": "tsc --noEmit通过", "tool": "code_run"},
+    {"check": "types/commands.ts存在且包含所有命令签名", "tool": "file_read"}
+  ]
+}

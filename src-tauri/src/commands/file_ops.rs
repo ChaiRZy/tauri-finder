@@ -54,6 +54,7 @@ pub(super) fn entry_from_path(path: &Path) -> Result<FileEntry, String> {
 
 /// List all entries in a given directory.
 /// Returns a sorted vector: directories first, then files, both alphabetically.
+#[specta::specta]
 #[tauri::command]
 pub fn list_directory(path: String) -> Result<Vec<FileEntry>, String> {
     let dir = Path::new(&path);
@@ -83,6 +84,7 @@ pub fn list_directory(path: String) -> Result<Vec<FileEntry>, String> {
 }
 
 /// Get detailed info about a single file or directory.
+#[specta::specta]
 #[tauri::command]
 pub fn get_file_info(path: String) -> Result<FileInfo, String> {
     let p = Path::new(&path);
@@ -103,6 +105,7 @@ pub fn get_file_info(path: String) -> Result<FileInfo, String> {
 
 /// Create a new directory at the given path.
 /// The parent directory must already exist.
+#[specta::specta]
 #[tauri::command]
 pub fn create_directory(path: String) -> Result<FileEntry, String> {
     let p = Path::new(&path);
@@ -111,6 +114,7 @@ pub fn create_directory(path: String) -> Result<FileEntry, String> {
 }
 
 /// Rename (or move) a file/directory from old_path to new_path.
+#[specta::specta]
 #[tauri::command]
 pub fn rename_item(old_path: String, new_path: String) -> Result<FileEntry, String> {
     let old = Path::new(&old_path);
@@ -122,6 +126,7 @@ pub fn rename_item(old_path: String, new_path: String) -> Result<FileEntry, Stri
 /// Delete a file or directory at the given path.
 /// If permanent is true, deletion is irreversible. If false, we delete permanently for now.
 /// Directory removal recursively deletes all contents.
+#[specta::specta]
 #[tauri::command]
 pub fn delete_item(path: String) -> Result<(), String> {
     let p = Path::new(&path);

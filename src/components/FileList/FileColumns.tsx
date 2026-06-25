@@ -133,7 +133,7 @@ export default function FileColumns({ columns, selectedPaths, onSelect, onDouble
         const width = colWidths[colIdx] || 240;
         const isLast = colIdx === columns.length - 1;
         return (
-          <div key={col.path} className="file-column" style={{ minWidth: isLast ? width : 'unset', maxWidth: isLast ? width : 'unset', width: isLast ? width : 'unset', flex: isLast ? 1 : 'none' }}>
+          <div key={col.path} className="file-column" style={isLast ? { flex: 1, minWidth: 220 } : { width, minWidth: width, maxWidth: width, flex: 'none' }}>
             <div className="file-column-header">{col.path.split(/[/\\]/).pop() || col.path}</div>
             <div className="file-column-body">
               {col.entries.length === 0 ? (

@@ -37,6 +37,31 @@ export function isImageExtension(ext: string): boolean {
   return ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'bmp', 'ico'].includes(ext.toLowerCase());
 }
 
+/// Check if a file extension is a video type.
+export function isVideoExtension(ext: string): boolean {
+  return ['mp4', 'webm', 'avi', 'mov', 'mkv', 'flv', 'wmv'].includes(ext.toLowerCase());
+}
+
+/// Check if a file extension is an audio type.
+export function isAudioExtension(ext: string): boolean {
+  return ['mp3', 'wav', 'flac', 'ogg', 'aac', 'm4a', 'wma'].includes(ext.toLowerCase());
+}
+
+/// Check if a file extension is a PDF.
+export function isPdfExtension(ext: string): boolean {
+  return ext.toLowerCase() === 'pdf';
+}
+
+/// Check if a file extension is a JSON file.
+export function isJsonExtension(ext: string): boolean {
+  return ext.toLowerCase() === 'json';
+}
+
+/// Check if a file extension is likely binary (non-text, non-media).
+export function isBinaryExtension(ext: string): boolean {
+  return ['exe', 'dll', 'bin', 'dat', 'obj', 'lib', 'so', 'dylib', 'wasm'].includes(ext.toLowerCase());
+}
+
 /// Check if a file extension is a text type.
 export function isTextExtension(ext: string): boolean {
   return ['txt', 'md', 'json', 'js', 'ts', 'jsx', 'tsx', 'css', 'html', 'xml', 'yaml', 'yml', 'toml', 'ini', 'cfg', 'log', 'sh', 'bat', 'ps1', 'env', 'gitignore'].includes(ext.toLowerCase());

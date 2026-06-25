@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "A Tauri App"
 authors = ["you"]
 edition = "2021"
+default-run = "tauri-finder"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -27,4 +28,25 @@ walkdir = "2"
 mime_guess = "2"
 dirs = "5"
 tauri-plugin-shell = "2"
+notify-debouncer-full = "0.3"
+similar = "2.7"
+git2 = "0.20"
+arborium = { version = "2", default-features = false, features = [
+  "lang-rust", "lang-go", "lang-yaml", "lang-python", "lang-javascript",
+  "lang-typescript", "lang-tsx", "lang-java", "lang-cpp", "lang-bash",
+  "lang-c-sharp", "lang-html", "lang-css", "lang-c", "lang-json",
+  "lang-lua", "lang-ruby", "lang-php", "lang-toml", "lang-swift",
+  "lang-sql", "lang-xml",
+] }
+tauri-plugin-dialog = "2.7.1"
+tauri-plugin-fs = "2.5.1"
+tauri-plugin-notification = "2.3.3"
+tauri-plugin-store = "2"
+specta = { version = "2.0.0-rc.25", features = ["derive", "serde_json"] }
+tauri-specta = { version = "2.0.0-rc.25", features = ["typescript"] }
+specta-typescript = "0.0.12"
+
+[[bin]]
+name = "export_specta"
+path = "src/bin/export_specta.rs"
 

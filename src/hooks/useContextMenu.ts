@@ -5,7 +5,8 @@ export function useContextMenu() {
   const hideContextMenu = useUiStore((s) => s.hideContextMenu);
 
   const handleClick = useCallback(() => {
-    hideContextMenu();
+    // Use setTimeout to defer the state update and avoid event conflicts
+    setTimeout(() => hideContextMenu(), 0);
   }, [hideContextMenu]);
 
   useEffect(() => {

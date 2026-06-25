@@ -1,8 +1,8 @@
 # Finder
 
-A macOS Finder-style cross-platform file manager built with **Tauri v2** + **React 18** + **TypeScript** + **Rust**.
+A macOS Finder-style cross-platform file manager built with **Tauri v2** + **React 19** + **TypeScript** + **Rust**.
 
-> 一个仿 macOS Finder 风格、支持 Windows 的跨平台文件管理器，基于 Tauri v2 + React 18 + TypeScript + Rust 构建。
+> 一个仿 macOS Finder 风格、支持 Windows 的跨平台文件管理器，基于 Tauri v2 + React 19 + TypeScript + Rust 构建。
 
 ## 功能简介
 
@@ -10,7 +10,8 @@ A macOS Finder-style cross-platform file manager built with **Tauri v2** + **Rea
 - **完整文件操作**：新建/重命名/删除/复制/剪切/粘贴
 - **右键菜单可定制**：自由开关菜单项
 - **搜索过滤**：实时文件名搜索
-- **预览面板**：图片、文本、元信息预览
+- **预览面板**：图片、文本/代码高亮、视频、音频、PDF、JSON 折叠树、Hex dump
+- **Markdown 预览**：右侧插件，选中 .md 文件自动渲染
 - **分组排布**：按类型分组展示
 - **内置终端**：支持 cmd / PowerShell / Git Bash，交互式 CLI，快捷命令一键执行
 - **侧边栏**：系统目录、收藏夹、驱动器
@@ -18,6 +19,10 @@ A macOS Finder-style cross-platform file manager built with **Tauri v2** + **Rea
 - **状态栏**：路径显示、复制、快速命令、终端切换
 - **键盘快捷键**：Ctrl+C/V/X/A、Delete、F2、Ctrl+N/F/P 等
 - **多列导航（列视图）**：级联展开，支持回退
+- **Git 状态指示**：文件列表显示 staged / modified / untracked 等颜色圆点
+- **Git 状态面板**：右侧插件，展示分支、变更统计、文件列表
+- **Diff 对比**：选中两个文件后一键对比
+- **插件系统**：VS Code 风格 Activity Bar 统一开关，事件总线解耦通信
 
 ## Features
 
@@ -44,10 +49,38 @@ A macOS Finder-style cross-platform file manager built with **Tauri v2** + **Rea
 - Search bar can be toggled via toolbar button
 
 ### Preview Panel
-- Toggle preview with toolbar button or Ctrl+P
+- Toggle preview with Activity Bar or Ctrl+P
 - Image preview (PNG, JPG, GIF, SVG, WebP, BMP)
-- Text file preview (TXT, MD, JSON, code files)
+- Text/code file preview with syntax highlighting (Arborium)
+- Video preview (MP4, WebM, AVI, MOV, MKV)
+- Audio preview (MP3, WAV, FLAC, OGG)
+- PDF preview (via iframe)
+- JSON preview with collapsible tree
+- Large file (>10MB) warning before loading
+- Binary hex dump preview
 - File metadata (kind, size, dates, path)
+
+### Markdown Preview
+- Dedicated right-side plugin for .md files
+- GitHub Flavored Markdown (GFM) support
+- Code blocks, tables, blockquotes, images, etc.
+
+### Plugin System
+- **Activity Bar** — 48px left-side strip with clickable icons for all plugins
+- **Left position** — file-explorer sidebar
+- **Right position** — preview, markdown-preview, diff-viewer, git-status
+- **Bottom position** — terminal, output, tasks
+- **Event Bus** — publish/subscribe for cross-plugin communication
+- **Persistent layout** — plugin sizes and visibility saved in localStorage
+
+### Git Integration
+- Automatic git repository detection
+- File status indicators in list view (staged/modified/untracked/deleted/renamed/conflict)
+- Git status overview panel with branch, change counts, and file list
+
+### File Diff
+- Side-by-side diff comparison (select two files → right-click → Compare Selected)
+- Insert/delete/equal highlighting with line numbers
 
 ### Grouping
 - Toggle grouping by type (Folders, Images, Documents, Code, Archives, Audio, Video, Executables, Other)
@@ -73,13 +106,12 @@ A macOS Finder-style cross-platform file manager built with **Tauri v2** + **Rea
 | `F2` | Rename |
 | `Ctrl+N` | New folder |
 | `Ctrl+F` | Focus search |
-| `Ctrl+P` | Toggle preview panel |
 
 ### Properties Dialog
 - View file/folder info: name, kind, size, path, modified date, created date, extension, MIME type
 
 ### Terminal
-- Built-in terminal panel (collapsible from bottom status bar)
+- Built-in terminal panel (togglable from Activity Bar or status bar)
 - Supports **cmd**, **PowerShell**, and **Git Bash**
 - **Quick Commands** — save and run frequently used commands with one click
   - Configure name, command, and execution mode (current directory or fixed path)
@@ -98,13 +130,18 @@ A macOS Finder-style cross-platform file manager built with **Tauri v2** + **Rea
 | Layer | Technology |
 |-------|-----------|
 | Desktop Shell | [Tauri v2](https://v2.tauri.app/) |
-| Frontend | React 18 + TypeScript |
+| Frontend | React 19 + TypeScript |
 | Build Tool | Vite |
 | State Management | [Zustand](https://github.com/pmndrs/zustand) |
 | Icons | [Lucide React](https://lucide.dev/) |
-| Backend | Rust (commands for file system, clipboard, search) |
-| Plugin: Opener | `@tauri-apps/plugin-opener` — open files with system default app |
-| Plugin: Shell | `@tauri-apps/plugin-shell` — execute terminal commands |
+| Markdown | [marked](https://marked.js.org/) |
+| Syntax Highlight | Arborium (20+ languages) |
+| Terminal | xterm.js |
+| Backend | Rust (file system, clipboard, search, git, diff, file watching) |
+| Git | git2 (libgit2 bindings) |
+| File Watching | notify-debouncer-full |
+| Plugin: Opener | `@tauri-apps/plugin-opener` |
+| Plugin: Shell | `@tauri-apps/plugin-shell` |
 
 ## Project Structure
 
@@ -115,39 +152,66 @@ tauri-finder/
 │   ├── App.css                   # Global styles
 │   ├── main.tsx                  # Entry point
 │   ├── components/
+│   │   ├── ActivityBar/          # VS Code-style plugin toggle bar
 │   │   ├── ContextMenu/          # Right-click menu
 │   │   ├── Dialogs/              # Create, Rename, Properties, ContextMenuSettings, QuickCommand
 │   │   ├── FileList/             # FileRow, FileGrid, FileColumns, FileIcon
-│   │   ├── Layout/               # AppLayout (main layout shell)
+│   │   ├── Layout/               # AppLayout (main layout shell), SplitPane
 │   │   ├── PathBar/              # Breadcrumb navigation + back/forward/up
-│   │   ├── Preview/              # File preview panel
+│   │   ├── Preview/              # File preview panel (multi-type)
 │   │   ├── SearchBar/            # Search input
 │   │   ├── Sidebar/              # Sidebar with system dirs, favorites, drives
-│   │   ├── StatusBar/            # Bottom bar with path, copy, quick commands, terminal
-│   │   ├── Terminal/             # Built-in terminal panel
-│   │   └── Toolbar/              # Top toolbar with view mode, sort, search, group, preview
+│   │   ├── StatusBar/            # Bottom bar with path, copy, quick commands, terminal toggle
+│   │   ├── Terminal/             # Built-in terminal panel (xterm.js)
+│   │   └── Toolbar/              # Top toolbar with view mode, sort, search, group
 │   ├── hooks/
 │   │   ├── useContextMenu.ts     # Global click-to-close for context menu
 │   │   ├── useFileSystem.ts      # Wraps Tauri invoke calls for file operations
+│   │   ├── useFileWatcher.ts     # Auto-refresh on filesystem changes
+│   │   ├── useGitStatus.ts       # Git repository status hook
 │   │   └── useKeyboard.ts        # Global keyboard shortcuts
+│   ├── layout/
+│   │   ├── types.ts              # LayoutNode / LayoutSplit / LayoutLeaf
+│   │   ├── LayoutEngine.tsx      # Recursive layout renderer
+│   │   └── index.ts              # Barrel export
+│   ├── plugins/
+│   │   ├── types.ts              # PluginDefinition, PluginPosition, etc.
+│   │   ├── registry.ts           # registerPlugin / getAllPlugins
+│   │   ├── pluginStore.ts        # Zustand store for plugin visibility, sizes, active tab
+│   │   ├── eventBus.ts           # Lightweight pub/sub event bus
+│   │   ├── index.ts              # Init all built-in plugins
+│   │   ├── FileExplorer/         # Left sidebar plugin
+│   │   ├── Terminal/             # Bottom terminal plugin
+│   │   ├── Output/               # Bottom output log plugin
+│   │   ├── Tasks/                # Bottom tasks panel
+│   │   ├── PreviewPlugin/        # Right preview panel plugin wrapper
+│   │   ├── MarkdownPreview/      # Right markdown preview plugin
+│   │   ├── DiffViewer/           # Right diff comparison plugin
+│   │   └── GitStatus/            # Right git status overview plugin
 │   ├── stores/
-│   │   ├── fileStore.ts          # Zustand store: navigation, entries, columns, sorting, grouping
-│   │   └── uiStore.ts            # Zustand store: view mode, selection, clipboard, dialogs, terminal
+│   │   ├── fileStore.ts          # Zustand store: navigation, entries, columns, sorting, grouping, tabs
+│   │   └── uiStore.ts            # Zustand store: view mode, selection, clipboard, dialogs, quick cmds
 │   ├── types/
 │   │   └── file.ts               # TypeScript interfaces and enums
 │   └── utils/
-│       ├── constants.ts           # Size units, system dir names, icon colors
-│       └── formatters.ts          # Size, date, file type formatting + grouping
+│       ├── constants.ts          # Size units, system dir names, icon colors
+│       ├── formatters.ts         # Size, date, file type formatting + grouping + extension checks
+│       └── fuzzyMatch.ts         # Fuzzy string matching for search
 ├── src-tauri/                    # Rust backend
 │   ├── src/
 │   │   ├── lib.rs                # Tauri builder with all command registrations
+│   │   ├── main.rs               # Entry point
 │   │   ├── models/
 │   │   │   └── file_entry.rs     # FileEntry struct + FileInfo
 │   │   └── commands/
-│   │       ├── file_ops.rs       # list_directory, create_directory, rename_item, delete_item
+│   │       ├── file_ops.rs       # list_directory, create_directory, rename_item, delete_item, get_file_info
 │   │       ├── clipboard.rs      # copy_items, move_items
-│   │       ├── search.rs         # search_files
-│   │       └── system.rs         # get_system_dirs, get_drives, get_home_dir, read_text_file
+│   │       ├── search.rs         # search_files, search_content
+│   │       ├── diff.rs           # diff_files (similar crate)
+│   │       ├── highlight.rs      # highlight_file (Arborium)
+│   │       ├── watcher.rs        # File system change watcher (notify)
+│   │       ├── git.rs            # get_git_status (git2)
+│   │       └── system.rs         # get_system_dirs, get_drives, get_home_dir, read_text_file, read_file_bytes
 │   ├── Cargo.toml
 │   └── tauri.conf.json           # Tauri configuration
 ├── package.json

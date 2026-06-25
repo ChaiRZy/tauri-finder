@@ -94,3 +94,148 @@
   text-align: center;
   padding: 8px;
 }
+
+/* ── Arborium Syntax Highlighting ── */
+.hl-code {
+  font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.hl-code a-k { color: #d73a49; }  /* keyword */
+.hl-code a-s { color: #032f62; }  /* string */
+.hl-code a-f { color: #6f42c1; }  /* function */
+.hl-code a-c { color: #6a737d; font-style: italic; }  /* comment */
+.hl-code a-n { color: #005cc5; }  /* number */
+.hl-code a-b { color: #005cc5; }  /* boolean */
+.hl-code a-t { color: #22863a; }  /* type */
+.hl-code a-p { color: #e36209; }  /* param */
+.hl-code a-o { color: #d73a49; }  /* operator */
+.hl-code a-d { color: #6f42c1; }  /* directive/preprocessor */
+
+/* ── Preview Enhancement: media / embed / json / hex ── */
+.preview-media {
+  max-width: 100%;
+  max-height: 70%;
+  border-radius: 4px;
+  display: block;
+  margin: 0 auto;
+}
+
+.preview-audio {
+  width: 100%;
+  border-radius: 4px;
+}
+
+.preview-embed {
+  width: 100%;
+  height: 70%;
+  border: none;
+  border-radius: 4px;
+}
+
+.preview-large-warning {
+  text-align: center;
+  padding: 20px;
+  color: #856404;
+  background: #fff3cd;
+  border: 1px solid #ffeeba;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.preview-large-warning button {
+  margin-top: 8px;
+  padding: 4px 16px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid #856404;
+  border-radius: 4px;
+  background: #fff;
+  color: #856404;
+}
+
+/* ── JSON Tree ── */
+.json-tree {
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.json-tree details {
+  margin: 0;
+}
+
+.json-tree details > summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.json-tree details > summary::before {
+  content: '▶';
+  font-size: 9px;
+  color: #999;
+  display: inline-block;
+  width: 10px;
+  transition: transform 0.1s;
+}
+
+.json-tree details[open] > summary::before {
+  content: '▼';
+}
+
+.json-tree .json-key {
+  color: #d73a49;
+}
+
+.json-tree .json-string {
+  color: #032f62;
+}
+
+.json-tree .json-number {
+  color: #005cc5;
+}
+
+.json-tree .json-boolean {
+  color: #6f42c1;
+}
+
+.json-tree .json-null {
+  color: #999;
+  font-style: italic;
+}
+
+.json-tree .json-bracket {
+  color: #555;
+}
+
+/* ── Hex dump ── */
+.hex-dump {
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.hex-dump .hex-offset {
+  color: #999;
+  margin-right: 12px;
+}
+
+.hex-dump .hex-bytes {
+  color: #333;
+  margin-right: 12px;
+}
+
+.hex-dump .hex-ascii {
+  color: #666;
+}

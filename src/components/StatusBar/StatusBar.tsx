@@ -1,5 +1,6 @@
 import { useFileStore } from '../../stores/fileStore';
 import { useUiStore } from '../../stores/uiStore';
+import { usePluginStore } from '../../plugins/pluginStore';
 import { Copy, Plus, Terminal } from 'lucide-react';
 import type { QuickCommand } from '../../types/file';
 import './StatusBar.css';
@@ -8,8 +9,8 @@ export default function StatusBar() {
   const currentDir = useFileStore((s) => s.currentDir);
   const entries = useFileStore((s) => s.entries);
   const openDialog = useUiStore((s) => s.openDialog);
-  const toggleTerminal = useUiStore((s) => s.toggleTerminal);
-  const showTerminal = useUiStore((s) => s.showTerminal);
+  const togglePlugin = usePluginStore((s) => s.togglePlugin);
+  const terminalVisible = usePluginStore((s) => s.visible['terminal']);
   const quickCommands = useUiStore((s) => s.quickCommands);
   const runInTerminal = useUiStore((s) => s.runInTerminal);
 
@@ -45,7 +46,7 @@ export default function StatusBar() {
         <button className="statusbar-btn" onClick={() => openDialog({ type: 'quickCommand' })} title="Manage quick commands">
           <Plus size={13} />
         </button>
-        <button className={`statusbar-btn ${showTerminal ? 'active' : ''}`} onClick={toggleTerminal} title="Toggle terminal">
+        <button className={`statusbar-btn ${terminalVisible ? 'active' : ''}`} onClick={() => togglePlugin('terminal')} title="Toggle terminal">
           <Terminal size={13} />
         </button>
       </div>

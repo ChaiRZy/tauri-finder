@@ -29,6 +29,7 @@ fn copy_recursive(src: &Path, dst: &Path) -> Result<(), String> {
 }
 
 /// Copy multiple source files/directories to a destination directory.
+#[specta::specta]
 #[tauri::command]
 pub fn copy_items(sources: Vec<String>, destination: String) -> Result<Vec<FileEntry>, String> {
     let dst = Path::new(&destination);
@@ -52,6 +53,7 @@ pub fn copy_items(sources: Vec<String>, destination: String) -> Result<Vec<FileE
 }
 
 /// Move multiple source files/directories to a destination directory.
+#[specta::specta]
 #[tauri::command]
 pub fn move_items(sources: Vec<String>, destination: String) -> Result<Vec<FileEntry>, String> {
     let dst = Path::new(&destination);

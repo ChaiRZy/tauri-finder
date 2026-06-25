@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import { useFileStore } from '../stores/fileStore';
 import { useUiStore } from '../stores/uiStore';
+import { usePluginStore } from '../plugins/pluginStore';
 import { useFileSystem } from './useFileSystem';
 
 export function useKeyboard() {
   const { goUp, currentDir, entries } = useFileStore();
-  const { selectedPaths, toggleSelection, clearSelection, selectAll, setClipboard, openDialog, togglePreview } = useUiStore();
+  const { selectedPaths, toggleSelection, clearSelection, selectAll, setClipboard, openDialog } = useUiStore();
   const { deleteItem, copyItems, moveItems } = useFileSystem();
 
   useEffect(() => {
@@ -130,7 +131,7 @@ export function useKeyboard() {
       // Ctrl+P - Toggle preview
       if (ctrl && e.key === 'p') {
         e.preventDefault();
-        togglePreview();
+        usePluginStore.getState().togglePlugin('preview');
         return;
       }
     };

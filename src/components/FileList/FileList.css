@@ -224,6 +224,11 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   flex: 1;
+  min-width: 0;
+}
+
+.file-column-item {
+  min-width: 0;
 }
 
 .file-column-item.focused {
@@ -260,3 +265,20 @@
   top: 29px;
   z-index: 1;
 }
+
+/* ── Git Status Indicator ── */
+.git-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.git-indicator--staged    { background: #2ea043; }
+.git-indicator--modified  { background: #d29922; }
+.git-indicator--untracked { background: #58a6ff; }
+.git-indicator--deleted   { background: #da3633; }
+.git-indicator--renamed   { background: #bc8cff; }
+.git-indicator--conflict  { background: #f0883e; }
+.git-indicator--unknown   { background: #8b949e; }
