@@ -161,13 +161,9 @@ export default function TerminalPanel() {
       const ro = new ResizeObserver(() => {
         try {
           fit.fit();
-          term.focus();
         } catch {}
       });
       ro.observe(container);
-
-      // Also focus on window resize
-      window.addEventListener('resize', () => { try { term.focus(); } catch {} });
 
       xtermRefs.current[tab.id] = term;
       updateTab(tab.id, { xterm: term, fitAddon: fit });
@@ -191,13 +187,18 @@ export default function TerminalPanel() {
 
   // Fit terminal + focus when tab changes
   useEffect(() => {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       for (const tab of tabs) {
         try { tab.fitAddon?.fit(); } catch {}
       }
       const active = tabs.find(t => t.id === activeTab);
-      if (active?.xterm) active.xterm.focus();
-    }, 50);
+      if (active?.xterm) {
+        active.xterm.focus();
+        // Also focus the hidden textarea for keyboard input
+        (active.xterm as any).textarea?.focus();
+      }
+    }, 80);
+    return () => clearTimeout(timer);
   }, [tabs, activeTab]);
 
   // Send terminal commands
@@ -351,6 +352,7 @@ export default function TerminalPanel() {
               ref={(el) => { termContainers.current[tab.id] = el; }}
               className="terminal-xterm-instance"
               style={{ display: tab.id === activeTab ? 'block' : 'none' }}
+              onClick={() => xtermRefs.current[tab.id]?.focus()}
             />
           ))}
         </div>

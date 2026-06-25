@@ -48,6 +48,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
+  min-width: 0;
 }
 
 .preview-pane {

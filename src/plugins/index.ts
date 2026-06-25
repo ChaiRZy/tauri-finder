@@ -58,7 +58,7 @@ export function initPlugins() {
     defaultSize: 220,
     minSize: 80,
     maxSize: 600,
-    defaultVisible: true,
+    defaultVisible: false,
     mcpTools: [],
   });
 
@@ -71,7 +71,7 @@ export function initPlugins() {
     defaultSize: 200,
     minSize: 80,
     maxSize: 600,
-    defaultVisible: true,
+    defaultVisible: false,
     mcpTools: [],
   });
 
@@ -84,7 +84,7 @@ export function initPlugins() {
     defaultSize: 200,
     minSize: 80,
     maxSize: 600,
-    defaultVisible: true,
+    defaultVisible: false,
     mcpTools: [],
   });
 

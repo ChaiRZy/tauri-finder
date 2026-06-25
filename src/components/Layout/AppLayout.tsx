@@ -19,6 +19,7 @@ import { getHomeDir } from '../../utils/constants';
 import { LayoutEngine } from '../../layout';
 import type { LayoutNode } from '../../layout';
 import type { PluginPosition, PluginDefinition } from '../../plugins/types';
+import PluginLauncher from '../PluginLauncher/PluginLauncher';
 import './AppLayout.css';
 
 /** 主内容区 */
@@ -238,13 +239,7 @@ export default function AppLayout() {
       {dialog?.type === 'tagManager' && dialog?.parentPath && <TagDialog />}
       {dialog?.type === 'tagManager' && !dialog?.parentPath && <TagManagerDialog />}
 
-      {/* Debug: show plugin state */}
-      <div style={{ position: 'fixed', bottom: 4, left: 4, zIndex: 99999, fontSize: 10, color: '#999', background: 'rgba(0,0,0,0.7)', padding: '2px 6px', borderRadius: 3 }}>
-        visible: {Object.entries(visible).filter(([,v]) => v).map(([k]) => k).join(', ') || 'none'}
-        | left: {leftPlugin?.id ?? 'null'}
-        | right: {rightPlugin?.id ?? 'null'}
-        | bottom: {bottomPlugins.map(p => p.id).join(',') || 'none'}
-      </div>
+      <PluginLauncher />
     </div>
   );
 }
