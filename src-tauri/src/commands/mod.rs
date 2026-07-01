@@ -5,6 +5,7 @@ pub mod file_ops;
 pub mod git;
 pub mod highlight;
 pub mod mcp;
+pub mod pty;
 pub mod search;
 pub mod system;
 pub mod watcher;

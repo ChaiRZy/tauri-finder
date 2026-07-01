@@ -14,27 +14,30 @@
   background: #1e1e1e;
 }
 
+/* ── Tab bar ── */
 .terminal-header {
   display: flex;
   align-items: center;
-  background: #2d2d2d;
-  border-bottom: 1px solid #3c3c3c;
+  background: #252525;
+  border-bottom: 1px solid #333;
   flex-shrink: 0;
+  height: 34px;
 }
 
 .terminal-tabs {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 0;
   overflow-x: auto;
   flex: 1;
+  height: 100%;
 }
 
 .terminal-tab {
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 6px 12px;
+  padding: 0 12px;
   font-size: 12px;
   cursor: pointer;
   color: #888;
@@ -42,100 +45,180 @@
   white-space: nowrap;
   user-select: none;
   min-width: 0;
+  max-width: 200px;
+  height: 100%;
 }
 
 .terminal-tab:hover {
   color: #ccc;
-  background: #363636;
+  background: #2a2a2a;
 }
 
 .terminal-tab.active {
-  color: #fff;
-  border-bottom-color: #4A90D9;
+  color: #dcdccc;
+  border-bottom-color: #8cd0d3;
   background: #1e1e1e;
 }
 
+.terminal-tab-status {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #555;
+  flex-shrink: 0;
+}
+
+.terminal-tab-status.running {
+  background: #7f9f7f;
+}
+
 .terminal-tab-icon {
-  font-size: 10px;
-  font-weight: 700;
-  opacity: 0.7;
+  font-size: 11px;
+  font-weight: 600;
+  color: #8cd0d3;
+  opacity: 0.8;
+  flex-shrink: 0;
 }
 
 .terminal-tab-name {
   font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .terminal-tab-close {
   background: none;
   border: none;
-  color: #666;
+  color: #555;
   cursor: pointer;
-  font-size: 10px;
+  font-size: 11px;
   padding: 0 2px;
   line-height: 1;
   margin-left: 2px;
+  flex-shrink: 0;
+  border-radius: 2px;
 }
 
 .terminal-tab-close:hover {
-  color: #ff6b6b;
+  color: #cc9393;
+  background: #333;
 }
 
 .terminal-tab-add {
   background: none;
   border: none;
-  color: #888;
+  color: #777;
   cursor: pointer;
   font-size: 16px;
-  padding: 4px 10px;
+  padding: 0 8px;
   line-height: 1;
   flex-shrink: 0;
-}
-
-.terminal-tab-add:hover {
-  color: #fff;
-}
-
-.terminal-xterm {
-  flex: 1;
-  min-height: 0;
-  padding: 2px 0;
-  position: relative;
-}
-
-.terminal-xterm-instance {
-  position: absolute;
-  inset: 0;
-  padding: 0 4px;
-}
-
-.terminal-xterm-instance .xterm {
   height: 100%;
 }
 
+.terminal-tab-add:hover {
+  color: #dcdccc;
+  background: #2a2a2a;
+}
+
+/* ── Header right ── */
 .terminal-header-right {
   display: flex;
   align-items: center;
-  gap: 2px;
-  padding-right: 6px;
+  gap: 4px;
+  padding-right: 4px;
   flex-shrink: 0;
+}
+
+.terminal-shortcuts-hint {
+  font-size: 10px;
+  color: #555;
+  white-space: nowrap;
+  margin-right: 4px;
 }
 
 .terminal-settings-btn {
   background: none;
   border: none;
-  color: #888;
+  color: #777;
   cursor: pointer;
-  padding: 4px;
+  padding: 4px 6px;
   display: flex;
   align-items: center;
   border-radius: 3px;
+  height: 100%;
 }
 
 .terminal-settings-btn:hover {
-  color: #fff;
-  background: #3c3c3c;
+  color: #dcdccc;
+  background: #333;
 }
 
+/* ── Search bar ── */
+.terminal-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  background: #2d2d2d;
+  border-bottom: 1px solid #333;
+  flex-shrink: 0;
+}
+
+.terminal-search-bar .search-icon {
+  color: #777;
+  flex-shrink: 0;
+}
+
+.terminal-search-input {
+  flex: 1;
+  background: #1e1e1e;
+  border: 1px solid #444;
+  border-radius: 3px;
+  color: #dcdccc;
+  font-size: 13px;
+  font-family: inherit;
+  padding: 3px 8px;
+  outline: none;
+}
+
+.terminal-search-input:focus {
+  border-color: #8cd0d3;
+}
+
+.terminal-search-nav {
+  background: none;
+  border: none;
+  color: #777;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+}
+
+.terminal-search-nav:hover {
+  color: #dcdccc;
+  background: #444;
+}
+
+.terminal-search-close {
+  background: none;
+  border: none;
+  color: #777;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+}
+
+.terminal-search-close:hover {
+  color: #cc9393;
+  background: #444;
+}
+
+/* ── Settings panel ── */
 .terminal-settings-panel {
   background: #2d2d2d;
   border-bottom: 1px solid #3c3c3c;
@@ -161,4 +244,38 @@
   height: 1px;
   background: #3c3c3c;
   margin: 2px 0;
+}
+
+/* ── Xterm container ── */
+.terminal-xterm {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.terminal-xterm-instance {
+  position: absolute;
+  inset: 0;
+  padding: 2px 4px;
+}
+
+.terminal-xterm-instance .xterm {
+  height: 100%;
+}
+
+.terminal-xterm-instance .xterm-viewport::-webkit-scrollbar {
+  width: 8px;
+}
+
+.terminal-xterm-instance .xterm-viewport::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+.terminal-xterm-instance .xterm-viewport::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 4px;
+}
+
+.terminal-xterm-instance .xterm-viewport::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

@@ -58,6 +58,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_notification::init())
+        .manage(commands::pty::PtyState::new())
         .setup(|app| {
             // Start watching the home directory; will be updated as user navigates
             if let Some(home) = dirs::home_dir() {
@@ -69,6 +70,10 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::mcp::mcp_list_tools,
             commands::mcp::mcp_call_tool,
+            commands::pty::pty_spawn,
+            commands::pty::pty_write,
+            commands::pty::pty_resize,
+            commands::pty::pty_kill,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
