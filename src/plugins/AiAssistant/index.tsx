@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { typedInvoke } from '../../utils/invoke';
 import { useFileStore } from '../../stores/fileStore';
 
 interface Message {
@@ -45,43 +45,45 @@ export default function AiAssistant() {
       let result: unknown;
       switch (name) {
         case 'list_directory':
-          result = await invoke('list_directory', { path: args.path ?? currentDir });
+          result = await typedInvoke.listDirectory(args.path as string ?? currentDir);
           break;
         case 'search_files':
-          result = await invoke('search_files', { query: args.query, basePath: args.basePath ?? currentDir });
+          result = await typedInvoke.searchFiles(args.query as string, args.basePath as string ?? currentDir);
           break;
         case 'search_content':
-          result = await invoke('search_content', { query: args.query, basePath: args.basePath ?? currentDir });
+          result = await typedInvoke.searchContent(args.query as string, args.basePath as string ?? currentDir);
           break;
-        case 'read_text_file':
-          result = await invoke('read_text_file', { path: args.path });
+        case 'read_text_file': {
+          const { readTextFile } = await import('@tauri-apps/plugin-fs');
+          result = await readTextFile(args.path as string);
           break;
+        }
         case 'get_file_info':
-          result = await invoke('get_file_info', { path: args.path });
+          result = await typedInvoke.getFileInfo(args.path as string);
           break;
         case 'create_directory':
-          result = await invoke('create_directory', { path: args.path });
+          result = await typedInvoke.createDirectory(args.path as string);
           break;
         case 'rename_item':
-          result = await invoke('rename_item', { oldPath: args.oldPath, newPath: args.newPath });
+          result = await typedInvoke.renameItem(args.oldPath as string, args.newPath as string);
           break;
         case 'delete_item':
-          result = await invoke('delete_item', { path: args.path });
+          result = await typedInvoke.deleteItem(args.path as string);
           break;
         case 'copy_items':
-          result = await invoke('copy_items', { sources: args.sources, destination: args.destination });
+          result = await typedInvoke.copyItems(args.sources as string[], args.destination as string);
           break;
         case 'move_items':
-          result = await invoke('move_items', { sources: args.sources, destination: args.destination });
+          result = await typedInvoke.moveItems(args.sources as string[], args.destination as string);
           break;
         case 'diff_files':
-          result = await invoke('diff_files', { pathA: args.pathA, pathB: args.pathB });
+          result = await typedInvoke.diffFiles(args.pathA as string, args.pathB as string);
           break;
         case 'highlight_file':
-          result = await invoke('highlight_file', { path: args.path });
+          result = await typedInvoke.highlightFile(args.path as string);
           break;
         case 'get_git_status':
-          result = await invoke('get_git_status', { path: args.path ?? currentDir });
+          result = await typedInvoke.getGitStatus(args.path as string ?? currentDir);
           break;
         default:
           return `未知工具: ${name}`;
@@ -161,7 +163,7 @@ ${toolDescriptions.map((t) => `- ${t.name}: ${t.description}`).join('\n')}`;
   /** 回退：使用 opencode 命令处理 */
   const callOpencode = useCallback(async (prompt: string): Promise<string> => {
     try {
-      const result: string = await invoke('ai_ask', { prompt, currentDir });
+      const result: string = await typedInvoke.aiAsk(prompt, currentDir);
       return result;
     } catch (e) {
       return `AI 助手暂不可用。请配置 API Key 或安装 opencode。\n\n错误: ${e}`;

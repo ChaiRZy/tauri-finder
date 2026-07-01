@@ -24,6 +24,16 @@
         { "name": "bash", "cmd": "C:\\Program Files\\Git\\bin\\bash.exe", "args": true }
       ]
     },
-    "shell:allow-stdin-write"
+    "shell:allow-stdin-write",
+    "fs:allow-read-text-file",
+    "fs:allow-read-file",
+    "fs:allow-write-text-file",
+    "fs:allow-exists",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        { "path": "**" }
+      ]
+    }
   ]
 }

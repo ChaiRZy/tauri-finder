@@ -1,15 +1,10 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Terminal as XtermTerminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
-import { WebglAddon } from '@xterm/addon-webgl';
-import { SearchAddon, ISearchOptions } from '@xterm/addon-search';
-import { WebLinksAddon } from '@xterm/addon-web-links';
-import { Unicode11Addon } from '@xterm/addon-unicode11';
-import { Command } from '@tauri-apps/plugin-shell';
 import { useUiStore } from '../../stores/uiStore';
 import { useFileStore } from '../../stores/fileStore';
 import type { ShellType } from '../../types/file';
-import { Settings, Plus, X, Search, ChevronUp, ChevronDown } from 'lucide-react';
+import { Settings, Plus, X } from 'lucide-react';
 import '@xterm/xterm/css/xterm.css';
 import './Terminal.css';
 
@@ -21,8 +16,15 @@ interface TabState {
   shellType: ShellType;
   xterm: XtermTerminal | null;
   fitAddon: FitAddon | null;
-  child: any; // Child process
-  cmdObj: any; // Command object
+  child: any;
+  cmdObj: any;
+}
+
+let isTauri = false;
+try {
+  isTauri = !!(window as any).__TAURI_INTERNALS__;
+} catch {
+  isTauri = false;
 }
 
 export default function TerminalPanel() {
@@ -48,8 +50,38 @@ export default function TerminalPanel() {
     setTabs((prev) => prev.map((t) => t.id === id ? { ...t, ...patch } : t));
   }, []);
 
-  // Spawn a shell for a given tab
   const spawnShell = useCallback(async (tab: TabState) => {
+    if (!isTauri) {
+      const t = tabRefs.current.find((tt) => tt.id === tab.id);
+      if (t?.xterm) {
+        t.xterm.write('\x1b[33m[Browser mode - shell not available]\x1b[0m\r\n');
+        t.xterm.write('\x1b[33mRun in Tauri desktop app for full terminal support.\x1b[0m\r\n\r\n');
+        t.xterm.write('$ ');
+        let inputBuf = '';
+        t.xterm.onData((data) => {
+          for (const ch of data) {
+            if (ch === '\r') {
+              t.xterm!.write('\r\n');
+              if (inputBuf.trim()) {
+                t.xterm!.write(`\x1b[31mcommand not available in browser: ${inputBuf.trim()}\x1b[0m\r\n`);
+              }
+              inputBuf = '';
+              t.xterm!.write('$ ');
+            } else if (ch === '\x7f') {
+              if (inputBuf.length > 0) {
+                inputBuf = inputBuf.slice(0, -1);
+                t.xterm!.write('\b \b');
+              }
+            } else if (ch >= ' ') {
+              inputBuf += ch;
+              t.xterm!.write(ch);
+            }
+          }
+        });
+      }
+      return;
+    }
+
     const builtinShells: Record<string, { prog: string; args: string[] }> = {
       cmd: { prog: 'cmd', args: [] },
       powershell: { prog: 'powershell', args: [] },
@@ -70,6 +102,7 @@ export default function TerminalPanel() {
       args = [];
     }
     try {
+      const { Command } = await import('@tauri-apps/plugin-shell');
       const cmd = Command.create(prog, args, { cwd: currentDir || undefined, encoding: 'raw' });
       updateTab(tab.id, { cmdObj: cmd });
 
@@ -94,22 +127,20 @@ export default function TerminalPanel() {
       const child = await cmd.spawn();
       updateTab(tab.id, { child });
 
-      // Flush pending terminal command
       const pending = useUiStore.getState().terminalCommand;
       if (pending) {
         useUiStore.getState().clearTerminalCommand();
         child.write(pending + '\n');
       }
     } catch (e) {
-      const t = tabRefs.current.find((t) => t.id === tab.id);
+      const t = tabRefs.current.find((tt) => tt.id === tab.id);
       if (t?.xterm) t.xterm.write(`\r\n\x1b[31m[failed: ${e}]\x1b[0m\r\n`);
     }
   }, [currentDir, updateTab]);
 
-  // Initialize xterm for each tab (when the container is available)
   useEffect(() => {
     for (const tab of tabs) {
-      if (tab.xterm) continue; // already initialized
+      if (tab.xterm) continue;
       const container = termContainers.current[tab.id];
       if (!container) continue;
 
@@ -150,12 +181,13 @@ export default function TerminalPanel() {
       term.open(container);
       setTimeout(() => fit.fit(), 50);
 
-      term.onData((data) => {
-        const t = tabRefs.current.find((t) => t.id === tab.id);
-        if (t?.child) t.child.write(data);
-      });
+      if (isTauri) {
+        term.onData((data) => {
+          const t = tabRefs.current.find((tt) => tt.id === tab.id);
+          if (t?.child) t.child.write(data);
+        });
+      }
 
-      // Focus terminal for keyboard input
       term.focus();
 
       const ro = new ResizeObserver(() => {
@@ -169,12 +201,10 @@ export default function TerminalPanel() {
       updateTab(tab.id, { xterm: term, fitAddon: fit });
       spawnShell(tab);
 
-      // Store cleanup ref
       (container as any).__ro = ro;
     }
   }, [tabs, updateTab, spawnShell]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       for (const tab of tabs) {
@@ -185,7 +215,6 @@ export default function TerminalPanel() {
     };
   }, []);
 
-  // Fit terminal + focus when tab changes
   useEffect(() => {
     const timer = setTimeout(() => {
       for (const tab of tabs) {
@@ -194,24 +223,24 @@ export default function TerminalPanel() {
       const active = tabs.find(t => t.id === activeTab);
       if (active?.xterm) {
         active.xterm.focus();
-        // Also focus the hidden textarea for keyboard input
         (active.xterm as any).textarea?.focus();
       }
     }, 80);
     return () => clearTimeout(timer);
   }, [tabs, activeTab]);
 
-  // Send terminal commands
   useEffect(() => {
     if (!terminalCommand) return;
     const active = tabRefs.current.find((t) => t.id === activeTab);
     if (active?.child) {
       active.child.write(terminalCommand + '\n');
       clearTerminalCommand();
+    } else if (active?.xterm && !isTauri) {
+      active.xterm.write(`\r\n\x1b[33m[command not available in browser: ${terminalCommand}]\x1b[0m\r\n$ `);
+      clearTerminalCommand();
     }
   }, [terminalCommand, activeTab, clearTerminalCommand]);
 
-  // Tab management
   const addTab = useCallback(() => {
     const def = useUiStore.getState().defaultShell;
     const newTab: TabState = {
@@ -237,7 +266,6 @@ export default function TerminalPanel() {
       delete xtermRefs.current[id];
       const next = prev.filter((t) => t.id !== id);
       if (next.length === 0) {
-        // keep at least one tab
         const fresh: TabState = {
           id: genId(),
           shellType: useUiStore.getState().defaultShell as ShellType,

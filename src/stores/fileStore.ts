@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { invoke } from '@tauri-apps/api/core';
+import { typedInvoke } from '../utils/invoke';
 import type { FileEntry, SortBy, SortOrder } from '../types/file';
 
 export interface ColumnData {
@@ -152,7 +152,7 @@ export const useFileStore = create<FileStore>((set, get) => {
     navigateTo: async (path: string) => {
       set({ loading: true, error: null });
       try {
-        const entries: FileEntry[] = await invoke('list_directory', { path });
+        const entries: FileEntry[] = await typedInvoke.listDirectory(path);
         const { tabs, activeTabId, sortBy, sortOrder } = get();
         const tab = tabs.find(t => t.id === activeTabId);
         if (!tab) { set({ loading: false }); return; }
@@ -212,7 +212,7 @@ export const useFileStore = create<FileStore>((set, get) => {
         const refreshed = await Promise.all(
           columns.map(async (col) => {
             try {
-              const entries: FileEntry[] = await invoke('list_directory', { path: col.path });
+              const entries: FileEntry[] = await typedInvoke.listDirectory(col.path);
               return { path: col.path, entries: sortEntries(entries, sortBy, sortOrder) };
             } catch { return col; }
           })
@@ -250,7 +250,7 @@ export const useFileStore = create<FileStore>((set, get) => {
     navigateColumn: async (path: string, fromIndex?: number) => {
       const { sortBy, sortOrder, columns, tabs, activeTabId } = get();
       try {
-        const entries: FileEntry[] = await invoke('list_directory', { path });
+        const entries: FileEntry[] = await typedInvoke.listDirectory(path);
         const sorted = sortEntries(entries, sortBy, sortOrder);
         const base = fromIndex !== undefined ? columns.slice(0, fromIndex + 1) : columns;
         const next = [...base, { path, entries: sorted }];

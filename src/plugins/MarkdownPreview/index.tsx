@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { readTextFile } from '@tauri-apps/plugin-fs';
 import { Marked } from 'marked';
 import { useUiStore } from '../../stores/uiStore';
 import { useFileStore } from '../../stores/fileStore';
@@ -38,9 +38,7 @@ export default function MarkdownPreview() {
 
     (async () => {
       try {
-        const raw: string = await invoke('read_text_file', {
-          path: selectedEntry!.path,
-        });
+        const raw: string = await readTextFile(selectedEntry!.path);
         if (cancelled) return;
         const rendered = await marked.parse(raw);
         if (cancelled) return;

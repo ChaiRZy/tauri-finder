@@ -23,11 +23,9 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::system::get_system_dirs,
             commands::system::get_drives,
             commands::system::get_home_dir,
-            commands::system::read_text_file,
-            commands::system::read_file_bytes,
             commands::git::get_git_status,
-            commands::write_file::write_text_file,
             commands::ai::ai_ask,
+            // read_text_file / read_file_bytes / write_text_file 已迁移至 @tauri-apps/plugin-fs
             // 注意: MCP 命令使用了递归的 serde_json::Value (input_schema/arguments/data)，
             // specta-typescript 处理递归类型时会栈溢出。MCP 命令不需要前端 TS 绑定，
             // 已在 run() 中通过 tauri::generate_handler! 单独注册。

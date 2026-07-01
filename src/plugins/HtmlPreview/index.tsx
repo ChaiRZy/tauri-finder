@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { readTextFile } from '@tauri-apps/plugin-fs';
 import { useUiStore } from '../../stores/uiStore';
 
 /**
@@ -30,7 +30,7 @@ export default function HtmlPreview() {
 
     (async () => {
       try {
-        const content: string = await invoke('read_text_file', { path: targetFile });
+        const content: string = await readTextFile(targetFile);
         if (cancelled) return;
         const blob = new Blob([content], { type: 'text/html; charset=utf-8' });
         const url = URL.createObjectURL(blob);

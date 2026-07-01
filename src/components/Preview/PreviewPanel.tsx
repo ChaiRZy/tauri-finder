@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { typedInvoke } from '../../utils/invoke';
 import { useUiStore } from '../../stores/uiStore';
 import { useFileStore } from '../../stores/fileStore';
 import { useFileSystem } from '../../hooks/useFileSystem';
@@ -61,7 +61,7 @@ export default function PreviewPanel() {
       setLoading(true);
       (async () => {
         try {
-          const html: string | null = await invoke('highlight_file', { path: selectedEntry.path });
+          const html: string | null = await typedInvoke.highlightFile(selectedEntry.path);
           if (html) {
             setPreviewContent(`<div class="hl-code">${html}</div>`);
           } else {
@@ -84,8 +84,9 @@ export default function PreviewPanel() {
       setLoading(true);
       (async () => {
         try {
-          const bytes: number[] = await invoke('read_file_bytes', { path: selectedEntry.path, maxBytes: 512 });
-          setPreviewContent(`<div class="hex-dump">${formatHexDump(bytes)}</div>`);
+          const { readFile } = await import('@tauri-apps/plugin-fs');
+          const bytes = await readFile(selectedEntry.path);
+          setPreviewContent(`<div class="hex-dump">${formatHexDump([...bytes].slice(0, 512))}</div>`);
         } catch {
           setPreviewContent('<div style="color:#999">Unable to read file</div>');
         }

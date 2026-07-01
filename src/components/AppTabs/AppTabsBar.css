@@ -1,14 +1,14 @@
-.file-tabs {
+.app-tabs-bar {
   display: flex;
   align-items: center;
   background: #dee1e6;
   flex-shrink: 0;
   gap: 0;
   padding: 4px 4px 0 4px;
-  height: 36px;
+  height: 38px;
 }
 
-.file-tabs-fs-btn {
+.app-tabs-sidebar-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -19,22 +19,22 @@
   border-radius: 4px;
   cursor: pointer;
   color: #555;
-  opacity: 0.7;
+  opacity: 0.6;
   flex-shrink: 0;
   margin-right: 2px;
 }
 
-.file-tabs-fs-btn:hover {
+.app-tabs-sidebar-btn:hover {
   opacity: 1;
-  background: rgba(0,0,0,0.08);
+  background: rgba(0,0,0,0.07);
 }
 
-.file-tabs-fs-btn.active {
+.app-tabs-sidebar-btn.active {
   opacity: 1;
   color: var(--accent);
 }
 
-.file-tabs-list {
+.app-tabs-list {
   display: flex;
   align-items: flex-end;
   gap: 0;
@@ -46,10 +46,19 @@
   padding-top: 4px;
 }
 
-.file-tab {
+.app-tabs-list::-webkit-scrollbar {
+  height: 3px;
+}
+
+.app-tabs-list::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border-radius: 2px;
+}
+
+.app-tab {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   padding: 4px 12px;
   font-size: 12px;
   cursor: pointer;
@@ -57,33 +66,45 @@
   border-radius: 6px 6px 0 0;
   white-space: nowrap;
   max-width: 180px;
-  position: relative;
   flex-shrink: 0;
   height: 32px;
   background: transparent;
   user-select: none;
+  transition: background 0.1s;
 }
 
-.file-tab:hover {
-  background: rgba(0,0,0,0.06);
+.app-tab:hover {
+  background: rgba(0,0,0,0.05);
 }
 
-.file-tab.active {
+.app-tab.active {
   color: #1d1d1f;
   background: #fff;
   font-weight: 500;
   z-index: 1;
-  box-shadow: 0 -1px 2px rgba(0,0,0,0.05);
+  box-shadow: 0 -1px 2px rgba(0,0,0,0.04);
 }
 
-.file-tab-label {
+.app-tab-icon {
+  display: flex;
+  align-items: center;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.app-tab.active .app-tab-icon {
+  opacity: 0.8;
+}
+
+.app-tab-label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   flex: 1;
+  min-width: 0;
 }
 
-.file-tab-close {
+.app-tab-close {
   background: none;
   border: none;
   color: #888;
@@ -97,21 +118,26 @@
   width: 16px;
   height: 16px;
   justify-content: center;
-  transition: opacity 0.1s;
+  transition: opacity 0.1s, background 0.1s;
 }
 
-.file-tab:hover .file-tab-close,
-.file-tab.active .file-tab-close {
+.app-tab:hover .app-tab-close,
+.app-tab.active .app-tab-close {
   opacity: 0.7;
 }
 
-.file-tab-close:hover {
+.app-tab-close:hover {
   opacity: 1 !important;
   color: #fff;
   background: #999;
 }
 
-.file-tab-add {
+.app-tabs-add-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.app-tab-add {
   background: none;
   border: none;
   color: #666;
@@ -120,41 +146,39 @@
   padding: 4px 8px;
   display: flex;
   align-items: center;
-  flex-shrink: 0;
   border-radius: 50%;
   margin-left: 2px;
 }
 
-.file-tab-add:hover {
+.app-tab-add:hover {
   opacity: 1;
-  background: rgba(0,0,0,0.08);
+  background: rgba(0,0,0,0.07);
 }
 
-/* Right-click context menu */
-.file-tabs-ctx-menu {
-  position: fixed;
-  z-index: 2000;
+.app-tabs-add-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 2px;
   min-width: 180px;
   background: #fff;
   border: 1px solid var(--border);
   border-radius: 6px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  z-index: 1000;
   padding: 4px 0;
 }
 
-.file-tabs-ctx-item {
-  padding: 6px 12px;
-  font-size: 12px;
-  color: var(--text-main);
+.app-tabs-add-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: #333;
   cursor: pointer;
 }
 
-.file-tabs-ctx-item:hover {
+.app-tabs-add-item:hover {
   background: var(--hover);
-}
-
-.file-tabs-ctx-sep {
-  height: 1px;
-  background: var(--border);
-  margin: 4px 0;
 }

@@ -1,14 +1,8 @@
 import { useState, useCallback } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { typedInvoke } from '../../utils/invoke';
+import type { DiffLine } from '../../bindings';
 import { useUiStore } from '../../stores/uiStore';
 import { useFileStore } from '../../stores/fileStore';
-
-interface DiffLine {
-  tag: 'equal' | 'insert' | 'delete';
-  line_a: number | null;
-  line_b: number | null;
-  content: string;
-}
 
 /**
  * Diff 对比插件
@@ -35,10 +29,7 @@ export default function DiffViewer() {
     setLoading(true);
     setError(null);
     try {
-      const result: DiffLine[] = await invoke('diff_files', {
-        pathA: fileA,
-        pathB: fileB,
-      });
+      const result: DiffLine[] = await typedInvoke.diffFiles(fileA, fileB);
       setDiff(result);
     } catch (e) {
       setError(String(e));

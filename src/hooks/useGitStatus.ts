@@ -1,11 +1,8 @@
 import { useEffect, useState } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { typedInvoke } from '../utils/invoke';
+import type { GitFileStatus as TauriGitFileStatus } from '../bindings';
 
-export interface GitFileStatus {
-  path: string;
-  status: string;
-  staged: boolean;
-}
+export type GitFileStatus = TauriGitFileStatus;
 
 export interface GitStatusMap {
   [relativePath: string]: GitFileStatus;
@@ -35,9 +32,7 @@ export function useGitStatus(currentDir: string): {
 
     (async () => {
       try {
-        const list: GitFileStatus[] = await invoke('get_git_status', {
-          path: currentDir,
-        });
+        const list: GitFileStatus[] = await typedInvoke.getGitStatus(currentDir);
         if (cancelled) return;
         const map: GitStatusMap = {};
         for (const item of list) {

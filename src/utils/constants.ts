@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core';
+import { typedInvoke } from './invoke';
 import type { FileEntry } from '../types/file';
 
 /// File size formatting unit thresholds.
@@ -33,15 +33,15 @@ export const EXT_ICON_COLORS: Record<string, string> = {
 
 /// Get the home directory from the Rust backend.
 export async function getHomeDir(): Promise<string> {
-  return await invoke('get_home_dir');
+  return await typedInvoke.getHomeDir();
 }
 
 /// Get system directories from the Rust backend.
 export async function getSystemDirs(): Promise<FileEntry[]> {
-  return await invoke('get_system_dirs');
+  return await typedInvoke.getSystemDirs();
 }
 
 /// Get drive list from the Rust backend.
 export async function getDrives(): Promise<string[]> {
-  return await invoke('get_drives');
+  return await typedInvoke.getDrives();
 }

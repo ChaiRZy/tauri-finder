@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { ViewMode, ClipboardState, ContextMenuState, DialogState, FileEntry, ContextMenuConfig, ContextMenuItemId, ShellType, QuickCommand, CustomShell } from '../types/file';
 import { DEFAULT_CONTEXT_MENU_CONFIG, DEFAULT_SHELL } from '../types/file';
-import { usePluginStore } from '../plugins/pluginStore';
+import { useAppTabsStore } from '../stores/appTabsStore';
 
 const MENU_CONFIG_KEY = 'finder-context-menu-config';
 const QUICK_COMMANDS_KEY = 'finder-quick-commands';
@@ -191,7 +191,14 @@ export const useUiStore = create<UiStore>((set) => ({
 
   runInTerminal: (cmd) => {
     set({ terminalCommand: cmd });
-    usePluginStore.getState().showPlugin('terminal');
+    // Open terminal as a tab
+    const store = useAppTabsStore.getState();
+    const existing = store.findTab('terminal');
+    if (existing) {
+      store.switchTab(existing.id);
+    } else {
+      store.addTab('terminal', { title: 'Terminal' });
+    }
   },
 
   clearTerminalCommand: () => set({ terminalCommand: null }),

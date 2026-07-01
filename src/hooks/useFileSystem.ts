@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { typedInvoke } from '../utils/invoke';
 import { useFileStore } from '../stores/fileStore';
 import { useUiStore } from '../stores/uiStore';
 import type { FileEntry } from '../types/file';
@@ -14,7 +14,7 @@ export function useFileSystem() {
   const createDirectory = useCallback(async (name: string) => {
     if (!currentDir) return;
     const path = `${currentDir.replace(/\/$/,'')}/${name}`;
-    await invoke('create_directory', { path });
+    await typedInvoke.createDirectory(path);
     await refresh();
   }, [currentDir, refresh]);
 
@@ -22,36 +22,37 @@ export function useFileSystem() {
     const parts = oldPath.replace(/\\/g, '/').split('/');
     parts.pop();
     const newPath = [...parts, newName].join('/');
-    await invoke('rename_item', { oldPath, newPath });
+    await typedInvoke.renameItem(oldPath, newPath);
     await refresh();
   }, [refresh]);
 
   const deleteItem = useCallback(async (path: string) => {
-    await invoke('delete_item', { path });
+    await typedInvoke.deleteItem(path);
     await refresh();
   }, [refresh]);
 
   const copyItems = useCallback(async (sources: string[], destination?: string) => {
     const dst = destination || currentDir;
     if (!dst) return;
-    await invoke('copy_items', { sources, destination: dst });
+    await typedInvoke.copyItems(sources, dst);
     await refresh();
   }, [currentDir, refresh]);
 
   const moveItems = useCallback(async (sources: string[], destination?: string) => {
     const dst = destination || currentDir;
     if (!dst) return;
-    await invoke('move_items', { sources, destination: dst });
+    await typedInvoke.moveItems(sources, dst);
     await refresh();
   }, [currentDir, refresh]);
 
-  const readTextFile = useCallback(async (path: string): Promise<string> => {
-    return await invoke('read_text_file', { path });
+  const readText = useCallback(async (path: string): Promise<string> => {
+    const { readTextFile } = await import('@tauri-apps/plugin-fs');
+    return await readTextFile(path);
   }, []);
 
   const searchFiles = useCallback(async (query: string): Promise<FileEntry[]> => {
     if (!currentDir) return [];
-    return await invoke('search_files', { query, basePath: currentDir });
+    return await typedInvoke.searchFiles(query, currentDir);
   }, [currentDir]);
 
   return {
@@ -60,7 +61,7 @@ export function useFileSystem() {
     deleteItem,
     copyItems,
     moveItems,
-    readTextFile,
+    readTextFile: readText,
     searchFiles,
     navigateTo,
     refresh,

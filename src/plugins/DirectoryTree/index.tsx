@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { typedInvoke } from '../../utils/invoke';
 import { useFileStore } from '../../stores/fileStore';
 import { getSystemDirs, getDrives } from '../../utils/constants';
 import type { FileEntry } from '../../types/file';
@@ -51,7 +51,7 @@ export default function DirectoryTree() {
     if (loading[path] || children[path]) return;
     setLoading((prev) => ({ ...prev, [path]: true }));
     try {
-      const entries: FileEntry[] = await invoke('list_directory', { path });
+      const entries: FileEntry[] = await typedInvoke.listDirectory(path);
       setChildren((prev) => ({ ...prev, [path]: entries.filter((e) => e.is_dir) }));
     } catch {}
     setLoading((prev) => ({ ...prev, [path]: false }));

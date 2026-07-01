@@ -1,15 +1,10 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { typedInvoke } from '../../utils/invoke';
 import { useUiStore } from '../../stores/uiStore';
 import { useFileStore } from '../../stores/fileStore';
 import { FileSearch, FileText } from 'lucide-react';
+import type { ContentMatch } from '../../bindings';
 import './SearchBar.css';
-
-interface ContentMatch {
-  path: string;
-  line: number;
-  content: string;
-}
 
 export default function SearchBar() {
   const searchQuery = useUiStore((s) => s.searchQuery);
@@ -29,10 +24,7 @@ export default function SearchBar() {
     }
     setLoading(true);
     try {
-      const results: ContentMatch[] = await invoke('search_content', {
-        query,
-        basePath: currentDir,
-      });
+      const results: ContentMatch[] = await typedInvoke.searchContent(query, currentDir);
       setContentResults(results);
     } catch {
       setContentResults([]);
@@ -63,8 +55,8 @@ export default function SearchBar() {
   if (!showSearchBar) return null;
 
   return (
-    <div className="searchbar" style={{ flexDirection: 'column', gap: 0 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%' }}>
+    <div className="searchbar">
+      <div className="searchbar-row">
         <svg className="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
           <circle cx="6" cy="6" r="4.5" stroke="currentColor" strokeWidth="1.3" />
           <path d="M9.5 9.5L13 13" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
@@ -92,11 +84,6 @@ export default function SearchBar() {
             else setContentResults([]);
           }}
           title={mode === 'filename' ? 'Switch to content search' : 'Switch to filename search'}
-          style={{
-            border: 'none', background: mode === 'content' ? '#e0e0e0' : 'transparent',
-            cursor: 'pointer', padding: '2px 6px', borderRadius: 4, color: '#666', fontSize: 12,
-            display: 'flex', alignItems: 'center', gap: 3,
-          }}
         >
           {mode === 'filename' ? <FileSearch size={13} /> : <FileText size={13} />}
           <span style={{ fontSize: 11 }}>{mode === 'filename' ? 'Name' : 'Content'}</span>
@@ -110,27 +97,19 @@ export default function SearchBar() {
 
       {/* Content search results */}
       {mode === 'content' && contentResults.length > 0 && (
-        <div style={{
-          width: '100%', maxHeight: 200, overflowY: 'auto', borderTop: '1px solid #e5e5e5',
-          background: '#fff', fontSize: 12,
-        }}>
+        <div className="search-results">
           {contentResults.map((match, i) => (
             <div
               key={i}
+              className="search-result-item"
               onClick={() => goToFile(match)}
-              style={{
-                padding: '4px 8px', cursor: 'pointer', borderBottom: '1px solid #f0f0f0',
-                display: 'flex', gap: 8, alignItems: 'flex-start',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f5f5')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              <span style={{ color: '#999', flexShrink: 0, minWidth: 30 }}>{match.line}</span>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ color: '#888', fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <span className="search-result-line">{match.line}</span>
+              <div className="search-result-body">
+                <div className="search-result-path">
                   {match.path}
                 </div>
-                <div style={{ color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div className="search-result-content">
                   {match.content}
                 </div>
               </div>
@@ -140,11 +119,11 @@ export default function SearchBar() {
       )}
 
       {mode === 'content' && loading && (
-        <div style={{ padding: '4px 8px', color: '#999', fontSize: 11 }}>Searching...</div>
+        <div className="search-status">Searching...</div>
       )}
 
       {mode === 'content' && !loading && searchQuery && contentResults.length === 0 && (
-        <div style={{ padding: '4px 8px', color: '#999', fontSize: 11 }}>No content matches</div>
+        <div className="search-status">No content matches</div>
       )}
     </div>
   );

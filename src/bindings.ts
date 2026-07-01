@@ -51,17 +51,11 @@ export const commands = {
 	getDrives: () => typedError<string[], string>(__TAURI_INVOKE("get_drives")),
 	/**  Get the current user's home directory path. */
 	getHomeDir: () => typedError<string, string>(__TAURI_INVOKE("get_home_dir")),
-	/**  Read a text file's contents (first 10KB) for preview purposes. */
-	readTextFile: (path: string) => typedError<string, string>(__TAURI_INVOKE("read_text_file", { path })),
-	/**  Read raw bytes from a file (up to max_bytes). */
-	readFileBytes: (path: string, maxBytes: number) => typedError<number[], string>(__TAURI_INVOKE("read_file_bytes", { path, maxBytes })),
 	/**
 	 *  Retrieve git status for files under the given directory.
 	 *  Returns an empty vec if the directory is not inside a git repository.
 	 */
 	getGitStatus: (path: string) => typedError<GitFileStatus[], string>(__TAURI_INVOKE("get_git_status", { path })),
-	/**  写入文本文件（供 AI 助手使用） */
-	writeTextFile: (path: string, content: string) => typedError<null, string>(__TAURI_INVOKE("write_text_file", { path, content })),
 	/**  向 opencode CLI 发送自然语言指令并获取结果 */
 	aiAsk: (prompt: string, currentDir: string) => typedError<string, string>(__TAURI_INVOKE("ai_ask", { prompt, currentDir })),
 };

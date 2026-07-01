@@ -3,9 +3,10 @@
   align-items: center;
   padding: 4px 8px;
   border-bottom: 1px solid var(--border);
-  background: var(--bg-toolbar);
+  background: #fff;
   min-height: 36px;
   gap: 4px;
+  flex-shrink: 0;
 }
 
 .toolbar-left {
@@ -22,29 +23,6 @@
   flex-shrink: 0;
 }
 
-/* Window controls (macOS-style) */
-.window-controls {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 4px;
-}
-
-.win-btn {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-}
-
-.win-close { background: #ff5f57; border: 1px solid #e2463f; }
-.win-minimize { background: #febc2e; border: 1px solid #dda524; }
-.win-maximize { background: #28c840; border: 1px solid #19a82f; }
-.win-btn:hover { filter: brightness(0.85); }
-
-/* Breadcrumbs in toolbar - also serves as drag region */
 .toolbar-breadcrumbs {
   display: flex;
   align-items: center;
@@ -73,11 +51,9 @@
   font-size: 12px;
   color: var(--text-toolbar);
   opacity: 0.7;
-  cursor: default;
+  cursor: pointer;
   padding: 2px 4px;
   border-radius: 3px;
-  -webkit-app-region: no-drag;
-  app-region: no-drag;
 }
 
 .tb-breadcrumb-link:hover {
@@ -91,7 +67,6 @@
   font-weight: 500;
 }
 
-/* Toolbar buttons */
 .toolbar-btn {
   display: flex;
   align-items: center;
@@ -104,8 +79,6 @@
   cursor: pointer;
   color: var(--text-toolbar);
   font-size: 12px;
-  -webkit-app-region: no-drag;
-  app-region: no-drag;
 }
 
 .toolbar-btn:hover {
@@ -139,8 +112,6 @@
   color: var(--text-main);
   cursor: pointer;
   outline: none;
-  -webkit-app-region: no-drag;
-  app-region: no-drag;
 }
 
 .toolbar-select:focus {
@@ -150,16 +121,6 @@
 .sort-order-indicator {
   font-size: 12px;
   font-weight: 700;
-}
-
-/* Dedicated window drag handle */
-.toolbar-drag {
-  width: 60px;
-  min-width: 60px;
-  height: 100%;
-  -webkit-app-region: drag;
-  app-region: drag;
-  flex-shrink: 0;
 }
 
 /* Plugin menu dropdown */
@@ -204,8 +165,6 @@
   font-size: 12px;
   color: var(--text-main);
   cursor: pointer;
-  -webkit-app-region: no-drag;
-  app-region: no-drag;
 }
 
 .toolbar-menu-item:hover {
